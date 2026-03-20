@@ -1182,7 +1182,7 @@ fn proof_classical_wrong() {
             d.name, d.kie, ahad_str, temp_str, ss_str, marker);
     }
 
-    let projected_total = total_proven + pred_proven_upgrade;
+    let projected_total = (total_proven + pred_proven_upgrade).min(n);
     let projected_pct = projected_total as f64 / n as f64 * 100.0;
 
     eprintln!("\n    \x1b[1m{} enzymes with missing measurements predicted.\x1b[0m", pred_count);
