@@ -872,7 +872,7 @@ fn proof_database() -> Vec<ProofData> { vec![
     ProofData{name:"ICDH",      kie:3.0,  qvs:49.0, ah_ad:None, ah_ad_ref:"",
         temp_indep:Some(false), temp_ref:"",
         swain_schaad:None, ss_ref:""},
-    ProofData{name:"MDH",       kie:3.0,  qvs:9.4,  ah_ad:None, ah_ad_ref:"",
+    ProofData{name:"MDH",       kie:3.0,  qvs:53.0, ah_ad:None, ah_ad_ref:"",
         temp_indep:Some(false), temp_ref:"",
         swain_schaad:None, ss_ref:""},
     ProofData{name:"FDH",       kie:3.0,  qvs:47.0, ah_ad:Some(2.8), ah_ad_ref:"Blanchard 1985",
@@ -1680,7 +1680,7 @@ fn held_pos() -> Vec<Target> { vec![
     Target{name:"ChoOx",pdb:"2JBV",kie:10.0},         // Choline oxidase (Gadda 2005, FAD)
     Target{name:"PHBH",pdb:"1PBE",kie:3.5},           // p-Hydroxybenzoate hydroxylase (FAD)
     Target{name:"ICDH",pdb:"1AI2",kie:3.0},           // Isocitrate dehydrogenase (NAD)
-    Target{name:"MDH",pdb:"1MLD",kie:3.0},            // Malate dehydrogenase (NAD)
+    Target{name:"MDH",pdb:"4WLU",kie:3.0},            // Malate dehydrogenase (NAD+malate holo)
     Target{name:"FDH",pdb:"2NAD",kie:3.0},            // Formate dehydrogenase (NAD)
     Target{name:"DHPR",pdb:"1DHR",kie:3.0},           // Dihydropterin reductase (NAD)
     Target{name:"SDH",pdb:"1NEK",kie:4.0},            // Succinate dehydrogenase (FAD, Fe-S)
