@@ -1,0 +1,995 @@
+{
+  "positive_results": [
+    {
+      "target": {
+        "name": "Soybean Lipoxygenase (SLO-1)",
+        "pdb_id": "1YGE",
+        "kie": 81.0,
+        "source": "Klinman, Science 2006",
+        "tunneling": true,
+        "active_res": [
+          [
+            "HIS",
+            499
+          ],
+          [
+            "HIS",
+            504
+          ],
+          [
+            "HIS",
+            690
+          ],
+          [
+            "ASN",
+            694
+          ]
+        ],
+        "barrier_ev": 0.24,
+        "drug": "Anti-inflammatory (Zileuton)"
+      },
+      "qvs_total": 17.27092148712331,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 78,
+      "n_tunneling": 40,
+      "n_active": 2,
+      "elapsed_ms": 5749.7275,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Aromatic Amine Dehydrogenase",
+        "pdb_id": "2AH1",
+        "kie": 55.0,
+        "source": "Scrutton, Nat Chem 2012",
+        "tunneling": true,
+        "active_res": [
+          [
+            "ASP",
+            128
+          ],
+          [
+            "THR",
+            172
+          ],
+          [
+            "TRP",
+            160
+          ]
+        ],
+        "barrier_ev": 0.35,
+        "drug": "Neurotransmitter metabolism"
+      },
+      "qvs_total": 27.789091352194472,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 163,
+      "n_tunneling": 96,
+      "n_active": 4,
+      "elapsed_ms": 8304.377333999999,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Taurine Dioxygenase (TauD)",
+        "pdb_id": "1OS7",
+        "kie": 37.0,
+        "source": "Price, Biochemistry 2003",
+        "tunneling": true,
+        "active_res": [
+          [
+            "HIS",
+            99
+          ],
+          [
+            "ASP",
+            101
+          ],
+          [
+            "HIS",
+            255
+          ]
+        ],
+        "barrier_ev": 0.28,
+        "drug": "HIF pathway, cancer"
+      },
+      "qvs_total": 31.522675119899827,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 96,
+      "n_tunneling": 50,
+      "n_active": 7,
+      "elapsed_ms": 12470.739209,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Cyclooxygenase-2 (COX-2)",
+        "pdb_id": "5KIR",
+        "kie": 27.0,
+        "source": "Kiefer, JACS 2012",
+        "tunneling": true,
+        "active_res": [
+          [
+            "TYR",
+            385
+          ],
+          [
+            "HIS",
+            388
+          ],
+          [
+            "ARG",
+            120
+          ],
+          [
+            "SER",
+            530
+          ]
+        ],
+        "barrier_ev": 0.33,
+        "drug": "Celecoxib/Ibuprofen ($10B+ NSAID)"
+      },
+      "qvs_total": 31.466838396287272,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 95,
+      "n_tunneling": 64,
+      "n_active": 1,
+      "elapsed_ms": 21489.332084,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Galactose Oxidase",
+        "pdb_id": "1GOF",
+        "kie": 22.5,
+        "source": "Whittaker, Chem Rev 2003",
+        "tunneling": true,
+        "active_res": [
+          [
+            "TYR",
+            272
+          ],
+          [
+            "CYS",
+            228
+          ],
+          [
+            "HIS",
+            496
+          ]
+        ],
+        "barrier_ev": 0.3,
+        "drug": "Biosensor development"
+      },
+      "qvs_total": 27.000913049697346,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 67,
+      "n_tunneling": 33,
+      "n_active": 1,
+      "elapsed_ms": 2298.475375,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Methylamine Dehydrogenase",
+        "pdb_id": "2BBK",
+        "kie": 16.8,
+        "source": "Scrutton, JBC 1999",
+        "tunneling": true,
+        "active_res": [
+          [
+            "ASP",
+            76
+          ],
+          [
+            "THR",
+            474
+          ],
+          [
+            "TRP",
+            57
+          ]
+        ],
+        "barrier_ev": 0.32,
+        "drug": "Amine oxidase model"
+      },
+      "qvs_total": 29.067926873774827,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 118,
+      "n_tunneling": 70,
+      "n_active": 2,
+      "elapsed_ms": 7095.3435420000005,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Morphinone Reductase",
+        "pdb_id": "1GWJ",
+        "kie": 15.4,
+        "source": "Scrutton, JACS 2007",
+        "tunneling": true,
+        "active_res": [
+          [
+            "ASN",
+            189
+          ],
+          [
+            "TYR",
+            186
+          ]
+        ],
+        "barrier_ev": 0.31,
+        "drug": "Opioid metabolism"
+      },
+      "qvs_total": 21.17504370297589,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 26,
+      "n_tunneling": 15,
+      "n_active": 2,
+      "elapsed_ms": 690.021458,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Copper Amine Oxidase",
+        "pdb_id": "1OAC",
+        "kie": 12.3,
+        "source": "Klinman, Biochemistry 2003",
+        "tunneling": true,
+        "active_res": [
+          [
+            "HIS",
+            524
+          ],
+          [
+            "HIS",
+            526
+          ],
+          [
+            "ASP",
+            383
+          ]
+        ],
+        "barrier_ev": 0.34,
+        "drug": "Diabetes/inflammation (SSAO)"
+      },
+      "qvs_total": 25.347847928237094,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 167,
+      "n_tunneling": 89,
+      "n_active": 4,
+      "elapsed_ms": 22132.892208,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Cytochrome P450 CYP3A4",
+        "pdb_id": "1TQN",
+        "kie": 11.5,
+        "source": "Shaik, Chem Rev 2005",
+        "tunneling": true,
+        "active_res": [
+          [
+            "CYS",
+            442
+          ],
+          [
+            "THR",
+            309
+          ],
+          [
+            "GLU",
+            374
+          ]
+        ],
+        "barrier_ev": 0.38,
+        "drug": "Metabolizes 50% of all drugs"
+      },
+      "qvs_total": 21.237486453210906,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 28,
+      "n_tunneling": 15,
+      "n_active": 0,
+      "elapsed_ms": 1142.612083,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "PAM Monooxygenase",
+        "pdb_id": "1PHM",
+        "kie": 10.6,
+        "source": "Klinman, JBC 2006",
+        "tunneling": true,
+        "active_res": [
+          [
+            "HIS",
+            242
+          ],
+          [
+            "HIS",
+            244
+          ]
+        ],
+        "barrier_ev": 0.36,
+        "drug": "Neuropeptide processing"
+      },
+      "qvs_total": 29.064496190361155,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 39,
+      "n_tunneling": 24,
+      "n_active": 1,
+      "elapsed_ms": 533.894791,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Monoamine Oxidase B (MAO-B)",
+        "pdb_id": "1GOS",
+        "kie": 9.2,
+        "source": "Edmondson, Biochemistry 2009",
+        "tunneling": true,
+        "active_res": [
+          [
+            "TYR",
+            398
+          ],
+          [
+            "TYR",
+            435
+          ],
+          [
+            "CYS",
+            397
+          ]
+        ],
+        "barrier_ev": 0.4,
+        "drug": "Selegiline target (Parkinson's)"
+      },
+      "qvs_total": 25.74553695003294,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 87,
+      "n_tunneling": 49,
+      "n_active": 1,
+      "elapsed_ms": 7080.081,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Prolyl-4-Hydroxylase",
+        "pdb_id": "1GNZ",
+        "kie": 8.0,
+        "source": "Solomon, Chem Rev 2000",
+        "tunneling": true,
+        "active_res": [
+          [
+            "HIS",
+            412
+          ],
+          [
+            "ASP",
+            414
+          ],
+          [
+            "HIS",
+            483
+          ]
+        ],
+        "barrier_ev": 0.39,
+        "drug": "Roxadustat target (anemia)"
+      },
+      "qvs_total": 16.125924541367027,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 16,
+      "n_tunneling": 6,
+      "n_active": 0,
+      "elapsed_ms": 455.90425,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "PETN Reductase",
+        "pdb_id": "1H50",
+        "kie": 7.8,
+        "source": "Scrutton, JACS 2005",
+        "tunneling": true,
+        "active_res": [
+          [
+            "HIS",
+            181
+          ],
+          [
+            "THR",
+            26
+          ],
+          [
+            "TYR",
+            351
+          ]
+        ],
+        "barrier_ev": 0.37,
+        "drug": "Bioremediation"
+      },
+      "qvs_total": 18.003880082620494,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 34,
+      "n_tunneling": 22,
+      "n_active": 1,
+      "elapsed_ms": 697.540083,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "KDM4A Lysine Demethylase",
+        "pdb_id": "2OQ6",
+        "kie": 6.5,
+        "source": "Hausinger, Crit Rev 2004",
+        "tunneling": true,
+        "active_res": [
+          [
+            "HIS",
+            188
+          ],
+          [
+            "GLU",
+            190
+          ],
+          [
+            "HIS",
+            276
+          ]
+        ],
+        "barrier_ev": 0.41,
+        "drug": "Epigenetic cancer (JIB-04)"
+      },
+      "qvs_total": 19.2580126904399,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 76,
+      "n_tunneling": 40,
+      "n_active": 5,
+      "elapsed_ms": 3661.7275,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Aconitase",
+        "pdb_id": "1AMJ",
+        "kie": 6.0,
+        "source": "Cleland, Biochemistry 1998",
+        "tunneling": true,
+        "active_res": [
+          [
+            "SER",
+            642
+          ],
+          [
+            "HIS",
+            101
+          ],
+          [
+            "ASP",
+            100
+          ]
+        ],
+        "barrier_ev": 0.42,
+        "drug": "TCA cycle, cancer metabolism"
+      },
+      "qvs_total": 28.067551333340983,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 99,
+      "n_tunneling": 64,
+      "n_active": 3,
+      "elapsed_ms": 3693.349167,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Trimethylamine Dehydrogenase",
+        "pdb_id": "1DJN",
+        "kie": 4.6,
+        "source": "Scrutton, Nat Prod Rep 2004",
+        "tunneling": true,
+        "active_res": [
+          [
+            "TYR",
+            60
+          ],
+          [
+            "ASP",
+            267
+          ],
+          [
+            "HIS",
+            172
+          ]
+        ],
+        "barrier_ev": 0.44,
+        "drug": "TMAO — cardiovascular"
+      },
+      "qvs_total": 28.57862693168951,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 157,
+      "n_tunneling": 95,
+      "n_active": 3,
+      "elapsed_ms": 24223.704416,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Thymidylate Synthase",
+        "pdb_id": "1HZW",
+        "kie": 4.0,
+        "source": "Agrawal, JACS 2004",
+        "tunneling": true,
+        "active_res": [
+          [
+            "CYS",
+            195
+          ],
+          [
+            "ARG",
+            50
+          ],
+          [
+            "GLU",
+            87
+          ]
+        ],
+        "barrier_ev": 0.5,
+        "drug": "5-FU target (cancer chemo)"
+      },
+      "qvs_total": 19.368599148153976,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 59,
+      "n_tunneling": 36,
+      "n_active": 0,
+      "elapsed_ms": 1841.127416,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Liver Alcohol Dehydrogenase",
+        "pdb_id": "1LDE",
+        "kie": 3.8,
+        "source": "Klinman, Chem Rev 2006",
+        "tunneling": true,
+        "active_res": [
+          [
+            "CYS",
+            46
+          ],
+          [
+            "HIS",
+            67
+          ],
+          [
+            "CYS",
+            174
+          ]
+        ],
+        "barrier_ev": 0.48,
+        "drug": "Disulfiram mechanism"
+      },
+      "qvs_total": 48.11985146977041,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 128,
+      "n_tunneling": 77,
+      "n_active": 6,
+      "elapsed_ms": 19571.931583,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Dihydrofolate Reductase",
+        "pdb_id": "1RX2",
+        "kie": 3.5,
+        "source": "Benkovic, Science 2003",
+        "tunneling": true,
+        "active_res": [
+          [
+            "ASP",
+            27
+          ],
+          [
+            "THR",
+            113
+          ],
+          [
+            "TRP",
+            22
+          ]
+        ],
+        "barrier_ev": 0.55,
+        "drug": "Methotrexate (cancer)"
+      },
+      "qvs_total": 14.170957069948766,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 10,
+      "n_tunneling": 6,
+      "n_active": 1,
+      "elapsed_ms": 50.46125,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Alcohol Dehydrogenase",
+        "pdb_id": "1HSO",
+        "kie": 3.2,
+        "source": "Kohen, JACS 2000",
+        "tunneling": true,
+        "active_res": [
+          [
+            "CYS",
+            37
+          ],
+          [
+            "HIS",
+            59
+          ],
+          [
+            "CYS",
+            153
+          ]
+        ],
+        "barrier_ev": 0.45,
+        "drug": "Fomepizole target"
+      },
+      "qvs_total": 18.038877934430264,
+      "qvs_class": "CLASSICAL",
+      "n_effects": 52,
+      "n_tunneling": 30,
+      "n_active": 0,
+      "elapsed_ms": 2877.22325,
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "negative_results": [
+    {
+      "target": {
+        "name": "Lysozyme (hydrolysis)",
+        "pdb_id": "1LYZ",
+        "kie": 1.0,
+        "source": "Vocadlo, Nature 2001",
+        "tunneling": false,
+        "active_res": [
+          [
+            "GLU",
+            35
+          ],
+          [
+            "ASP",
+            52
+          ]
+        ],
+        "barrier_ev": 0.7,
+        "drug": "Control — no tunneling"
+      },
+      "qvs_total": 26.133782090654066,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 18,
+      "n_tunneling": 10,
+      "n_active": 0,
+      "elapsed_ms": 361.00937500000003,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Trypsin (serine protease)",
+        "pdb_id": "1TRN",
+        "kie": 1.2,
+        "source": "Hedstrom, Chem Rev 2002",
+        "tunneling": false,
+        "active_res": [
+          [
+            "HIS",
+            57
+          ],
+          [
+            "ASP",
+            102
+          ],
+          [
+            "SER",
+            195
+          ]
+        ],
+        "barrier_ev": 0.75,
+        "drug": "Control — classical catalysis"
+      },
+      "qvs_total": 48.83262612801298,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 48,
+      "n_tunneling": 26,
+      "n_active": 7,
+      "elapsed_ms": 1038.8382080000001,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Carbonic Anhydrase II",
+        "pdb_id": "1CA2",
+        "kie": 1.5,
+        "source": "Silverman, BBA 2000",
+        "tunneling": false,
+        "active_res": [
+          [
+            "HIS",
+            94
+          ],
+          [
+            "HIS",
+            96
+          ],
+          [
+            "HIS",
+            119
+          ]
+        ],
+        "barrier_ev": 0.65,
+        "drug": "Control — zinc catalysis"
+      },
+      "qvs_total": 35.46982433173158,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 26,
+      "n_tunneling": 14,
+      "n_active": 6,
+      "elapsed_ms": 495.981625,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Chymotrypsin",
+        "pdb_id": "4CHA",
+        "kie": 1.1,
+        "source": "Blow, Nature 1969",
+        "tunneling": false,
+        "active_res": [
+          [
+            "HIS",
+            57
+          ],
+          [
+            "ASP",
+            102
+          ],
+          [
+            "SER",
+            195
+          ]
+        ],
+        "barrier_ev": 0.72,
+        "drug": "Control — classical protease"
+      },
+      "qvs_total": 51.69922892819449,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 49,
+      "n_tunneling": 25,
+      "n_active": 10,
+      "elapsed_ms": 1071.610167,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Ribonuclease A",
+        "pdb_id": "7RSA",
+        "kie": 1.3,
+        "source": "Raines, Chem Rev 1998",
+        "tunneling": false,
+        "active_res": [
+          [
+            "HIS",
+            12
+          ],
+          [
+            "HIS",
+            119
+          ],
+          [
+            "LYS",
+            41
+          ]
+        ],
+        "barrier_ev": 0.68,
+        "drug": "Control — RNA cleavage"
+      },
+      "qvs_total": 37.773721452671744,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 24,
+      "n_tunneling": 11,
+      "n_active": 4,
+      "elapsed_ms": 384.929458,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Thermolysin",
+        "pdb_id": "1TLX",
+        "kie": 1.0,
+        "source": "Matthews, Acc Chem Res 1988",
+        "tunneling": false,
+        "active_res": [
+          [
+            "HIS",
+            142
+          ],
+          [
+            "HIS",
+            146
+          ],
+          [
+            "GLU",
+            166
+          ]
+        ],
+        "barrier_ev": 0.8,
+        "drug": "Control — zinc metalloprotease"
+      },
+      "qvs_total": 31.05274617322388,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 37,
+      "n_tunneling": 24,
+      "n_active": 4,
+      "elapsed_ms": 586.608833,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Triose Phosphate Isomerase",
+        "pdb_id": "1TIM",
+        "kie": 1.4,
+        "source": "Knowles, Nature 1991",
+        "tunneling": false,
+        "active_res": [
+          [
+            "GLU",
+            165
+          ],
+          [
+            "HIS",
+            95
+          ],
+          [
+            "LYS",
+            12
+          ]
+        ],
+        "barrier_ev": 0.6,
+        "drug": "Control — perfect enzyme"
+      },
+      "qvs_total": 34.95938285273557,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 48,
+      "n_tunneling": 24,
+      "n_active": 4,
+      "elapsed_ms": 1055.097,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Subtilisin",
+        "pdb_id": "1SBT",
+        "kie": 1.1,
+        "source": "Carter, Science 1988",
+        "tunneling": false,
+        "active_res": [
+          [
+            "ASP",
+            32
+          ],
+          [
+            "HIS",
+            64
+          ],
+          [
+            "SER",
+            221
+          ]
+        ],
+        "barrier_ev": 0.74,
+        "drug": "Control — serine protease"
+      },
+      "qvs_total": 34.95261300939686,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 16,
+      "n_tunneling": 8,
+      "n_active": 3,
+      "elapsed_ms": 427.177167,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Pepsin",
+        "pdb_id": "4PEP",
+        "kie": 1.0,
+        "source": "Davies, Ann Rev Biophys 2003",
+        "tunneling": false,
+        "active_res": [
+          [
+            "ASP",
+            32
+          ],
+          [
+            "ASP",
+            215
+          ]
+        ],
+        "barrier_ev": 0.78,
+        "drug": "Control — aspartyl protease"
+      },
+      "qvs_total": 30.713146532091976,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 37,
+      "n_tunneling": 17,
+      "n_active": 3,
+      "elapsed_ms": 601.955833,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "target": {
+        "name": "Phospholipase A2",
+        "pdb_id": "1BP2",
+        "kie": 1.2,
+        "source": "Scott, Science 1990",
+        "tunneling": false,
+        "active_res": [
+          [
+            "HIS",
+            48
+          ],
+          [
+            "ASP",
+            99
+          ],
+          [
+            "CYS",
+            44
+          ]
+        ],
+        "barrier_ev": 0.71,
+        "drug": "Control — lipid hydrolysis"
+      },
+      "qvs_total": 36.785447714489884,
+      "qvs_class": "QUANTUM-INFLUENCED",
+      "n_effects": 21,
+      "n_tunneling": 13,
+      "n_active": 3,
+      "elapsed_ms": 355.186959,
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "pearson_r2": 0.00032241741787638906,
+  "p_value": 0.9401051405303682,
+  "cohens_d": -1.5454313834983444,
+  "sensitivity": 0.55,
+  "specificity": 0.0,
+  "accuracy": 0.36666666666666664,
+  "total_elapsed_s": 152.450698083
+}

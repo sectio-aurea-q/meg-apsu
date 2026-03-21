@@ -1,0 +1,14 @@
+/Users/sabrinahackford/meg-apsu/target/release/deps/serde-cf156d3b86bdf8af.d: /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/sabrinahackford/meg-apsu/target/release/build/serde-c399bb8dcd02a07b/out/private.rs
+
+/Users/sabrinahackford/meg-apsu/target/release/deps/libserde-cf156d3b86bdf8af.rlib: /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/sabrinahackford/meg-apsu/target/release/build/serde-c399bb8dcd02a07b/out/private.rs
+
+/Users/sabrinahackford/meg-apsu/target/release/deps/libserde-cf156d3b86bdf8af.rmeta: /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/sabrinahackford/meg-apsu/target/release/build/serde-c399bb8dcd02a07b/out/private.rs
+
+/Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/Users/sabrinahackford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/Users/sabrinahackford/meg-apsu/target/release/build/serde-c399bb8dcd02a07b/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/sabrinahackford/meg-apsu/target/release/build/serde-c399bb8dcd02a07b/out
