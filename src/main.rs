@@ -10,6 +10,11 @@ use num_traits::Zero;
 use serde::Serialize;
 use std::{env, fs};
 use std::time::Instant;
+use std::sync::atomic::{AtomicBool, Ordering as AO};
+mod bench;
+
+// v1.3: Katalyse-Filter für Metallzentren. false = altes v1.2-Verhalten (für Vergleiche).
+pub static V13: AtomicBool = AtomicBool::new(true);
 
 const HBAR: f64 = 1.054571817e-34;
 const KB: f64 = 1.380649e-23;
@@ -163,6 +168,54 @@ fn is_nucleotide_substrate(r: &str) -> bool {
         |"PYR"|"OAA"|"PEP"|"G6P"|"F6P"|"FBP"|"GAP"|"CTP"|"UTP"|"UDP"|"CDP")
 }
 
+// ═══ v1.3: IST DIESES METALLZENTRUM KATALYTISCH? ═════════════════════════
+// Physikalische Regel, unabhängig von Enzymnamen: Eine C-H-Spaltung am Metall braucht
+// eine freie (oder durch Substrat/O2 besetzbare) Koordinationsstelle. Gesättigte Zentren
+// sind Elektronentransfer- oder Transportstellen.
+//  (a) Fe-S-Cluster / Rubredoxin: ≥4 Schwefel-Liganden, tetraedrisch gesättigt
+//  (b) Typ-1-Cu (Cupredoxin): Cu mit Cys-Thiolat-Ligand → Elektronentransfer
+//  (c) Häm mit zwei axialen Protein-Liganden (His/His, His/Met) → Cytochrom (ET)
+//  (d) Häm mit nur proximalem His: katalytisch nur mit "Push-Pull" (Poulos/Kraut):
+//      distaler Säure/Base-Partner (Arg/Gln/Asn) oder gebundener Ligand im distalen Raum.
+//      Sonst O2-Transport (Globine).
+//  (e) Nicht-Häm-Metall mit Koordinationszahl ≥6 ohne Wasser → gesättigt (z. B. Transferrin)
+const LIG_CUT: f64 = 2.6;
+fn is_metal(e: &str) -> bool { matches!(e, "FE"|"CU"|"MN"|"CO"|"MO"|"ZN"|"NI"|"MG"|"CA"|"NA"|"K") }
+// Austauschbare Kleinliganden: Wasser/Hydroxid/Oxo und zweiatomige Gase bzw. Anionen.
+// Sie besetzen die offene Stelle nur vorübergehend → Stelle gilt als offen, und sie sind kein Substrat.
+fn is_exchangeable(r: &str) -> bool { matches!(r, "HOH"|"WAT"|"OH"|"O"|"OXO"|"PER"|"OXY"|"O2"|"CMO"|"NO"|"CYN"|"AZI"|"F"|"CL") }
+pub fn metal_catalytic(atoms: &[Atom], mi: usize) -> bool {
+    let m = &atoms[mi];
+    let lig: Vec<usize> = atoms.iter().enumerate()
+        .filter(|(j,a)| *j != mi && !is_metal(&a.elem) && !(a.is_het && is_exchangeable(&a.res)) && adist(m, a) < LIG_CUT)
+        .map(|(j,_)| j).collect();
+    if lig.len() < 2 { return true; } // schlecht aufgelöst → keine Aussage, altes Verhalten
+    let n_s = lig.iter().filter(|&&j| atoms[j].elem == "S").count();
+    if lig.len() >= 4 && n_s >= 4 { return false; }                                   // (a)
+    if m.elem == "CU" && lig.iter().any(|&j| atoms[j].res=="CYS" && atoms[j].name=="SG") { return false; } // (b)
+    let heme_n = lig.iter().filter(|&&j| is_heme(&atoms[j].res) && atoms[j].elem=="N").count();
+    if heme_n >= 3 {
+        let axial: Vec<usize> = lig.iter().copied().filter(|&j| !atoms[j].is_het).collect();
+        if axial.len() >= 2 { return false; }                                         // (c)
+        if axial.is_empty() { return true; }
+        let ax = &atoms[axial[0]];
+        if (ax.res=="CYS" && ax.name=="SG") || (ax.res=="TYR" && ax.name=="OH") { return true; } // Thiolat/Phenolat-Push
+        // Normale vom proximalen Liganden durch das Fe auf die distale Seite
+        let (nx,ny,nz) = (m.x-ax.x, m.y-ax.y, m.z-ax.z);
+        let nl = (nx*nx+ny*ny+nz*nz).sqrt().max(1e-6);
+        let distal = |a: &Atom| -> f64 { ((a.x-m.x)*nx + (a.y-m.y)*ny + (a.z-m.z)*nz) / nl };
+        let pull = atoms.iter().any(|a| !a.is_het && adist(m,a) < 6.0 && distal(a) > 1.5
+            && matches!((a.res.as_str(), a.name.as_str()),
+                ("ARG","NE")|("ARG","NH1")|("ARG","NH2")|("GLN","NE2")|("GLN","OE1")|("ASN","ND2")|("ASN","OD1")));
+        let ligand = atoms.iter().any(|a| a.is_het && !is_heme(&a.res) && !is_metal(&a.elem) && !is_exchangeable(&a.res)
+            && !matches!(a.res.as_str(), "SO4"|"PO4"|"GOL"|"EDO"|"ACT"|"CL"|"IOD"|"BR"|"NO3"|"SCN"|"FMT"|"NH4"|"MPD"|"DMS"|"PEG"|"PGE"|"BME")
+            && adist(m,a) < 6.0 && distal(a) > 1.0);
+        return pull || ligand;                                                         // (d)
+    }
+    if lig.len() >= 6 { return false; }                                               // (e)
+    true
+}
+
 // ═══ REACTION TYPES ═════════════════════════════════════════════════════
 #[derive(Clone, Debug, Serialize)]
 enum RxnType { RadicalCH, HydrideTransfer, ProtonRelay, LewisAcid }
@@ -207,6 +260,11 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
     let sam_at: Vec<usize> = atoms.iter().enumerate().filter(|(_,a)| is_sam(&a.res)).map(|(i,_)|i).collect();
     let nuc_at: Vec<usize> = atoms.iter().enumerate().filter(|(_,a)| is_nucleotide_substrate(&a.res)).map(|(i,_)|i).collect();
 
+    let v13 = V13.load(AO::SeqCst);
+    let mut cat = vec![true; atoms.len()];
+    if v13 { for &mi in fe.iter().chain(cu.iter()).chain(mn.iter()).chain(co.iter()).chain(mo.iter()) {
+        cat[mi] = metal_catalytic(atoms, mi);
+    }}
     let find_sub = |ci: usize, r: f64| -> (bool, String) {
         for &hi in &het { if adist(&atoms[ci], &atoms[hi]) < r { return (true, atoms[hi].res.clone()); }}
         (false, String::new())
@@ -222,6 +280,7 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
     for &mi in fe.iter().chain(cu.iter()).chain(mn.iter()).chain(co.iter()).chain(mo.iter()) {
         let nuc_nearby = nuc_at.iter().any(|&ni| adist(&atoms[mi], &atoms[ni]) < 6.0);
         if nuc_nearby { continue; } // kinase, not radical enzyme
+        if v13 && !cat[mi] { continue; } // v1.3: gesättigtes ET-/Transportzentrum
         let in_heme = heme_at.iter().any(|&hi| adist(&atoms[mi], &atoms[hi]) < 4.5);
         let rad = if in_heme { 4.5 } else { 3.5 };
         let coord = coord_atoms(mi, rad);
@@ -347,8 +406,14 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
         if atoms[h1].chain != atoms[h2].chain { continue; }
         for &ei in asp.iter().chain(glu.iter()) {
             if adist(&atoms[h1], &atoms[ei]) < 5.5 && adist(&atoms[h2], &atoms[ei]) < 6.5 {
-                let has_m = fe.iter().chain(mn.iter()).chain(cu.iter()).chain(co.iter())
-                    .any(|&mi| adist(&atoms[mi],&atoms[h1])<5.0||adist(&atoms[mi],&atoms[h2])<5.0||adist(&atoms[mi],&atoms[ei])<5.0);
+                let has_m = if v13 {
+                    // v1.3: echte Facial Triad = BEIDE His und das Carboxylat koordinieren dasselbe katalytische Metall
+                    fe.iter().chain(mn.iter()).chain(cu.iter()).chain(co.iter()).any(|&mi| cat[mi]
+                        && adist(&atoms[mi],&atoms[h1])<LIG_CUT && adist(&atoms[mi],&atoms[h2])<LIG_CUT && adist(&atoms[mi],&atoms[ei])<LIG_CUT)
+                } else {
+                    fe.iter().chain(mn.iter()).chain(cu.iter()).chain(co.iter())
+                    .any(|&mi| adist(&atoms[mi],&atoms[h1])<5.0||adist(&atoms[mi],&atoms[h2])<5.0||adist(&atoms[mi],&atoms[ei])<5.0)
+                };
                 let has_2og = og_at.iter().any(|&oi| adist(&atoms[oi],&atoms[h1])<8.0||adist(&atoms[oi],&atoms[h2])<8.0);
                 let rxn = if has_m||has_2og { RxnType::RadicalCH } else { RxnType::ProtonRelay };
                 let (hs,sn) = find_sub(h1, 6.0);
@@ -364,8 +429,11 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
     // 9. Tyr radical — metal/heme gated
     for &ti in &tyr { for &hi in &his {
         if adist(&atoms[ti], &atoms[hi]) > 5.0 { continue; }
-        let m_near = fe.iter().chain(cu.iter()).any(|&mi| adist(&atoms[ti],&atoms[mi])<5.0);
-        let h_near = heme_at.iter().any(|&h| adist(&atoms[ti],&atoms[h])<6.0);
+        let m_near = fe.iter().chain(cu.iter()).any(|&mi| cat[mi] && adist(&atoms[ti],&atoms[mi])<5.0);
+        // v1.3: Häm zählt nur, wenn sein Fe katalytisch ist (oder kein Fe aufgelöst wurde)
+        let heme_ok = !v13 || fe.is_empty() || fe.iter().any(|&mi| cat[mi]
+            && heme_at.iter().any(|&h| adist(&atoms[mi],&atoms[h])<4.5));
+        let h_near = heme_ok && heme_at.iter().any(|&h| adist(&atoms[ti],&atoms[h])<6.0);
         if !m_near && !h_near { continue; }
         let ts = atoms[ti].seq;
         if sites.iter().any(|s| (s.kind.contains("-oxo")||s.kind.contains("-heme"))
@@ -1254,6 +1322,7 @@ fn main() {
         "blind"=>blind_test(),
         "drugbank"=>drugbank_scan(json),
         "proof"=>proof_classical_wrong(),
+        "bench"=>bench::bench(args.get(2).map(|s|s.as_str()).unwrap_or("")),
         "scan"=>if let Some(f)=args.get(2){cli_scan(f,json);}else{eprintln!("  meg-apsu scan <pdb> [--json]");},
         "batch"=>if let Some(d)=args.get(2){batch_scan(d,json);}else{eprintln!("  meg-apsu batch <dir> [--json]");},
         _=>{eprintln!("  meg-apsu validate              Training set ({} enzymes)",pos().len()+neg().len());
