@@ -493,18 +493,11 @@ fn compute_qvs(sites: &[ActiveSite], temp: f64) -> QVS {
     let mut total = (enh_sc + rad_sc + sub_b - rel_pen).max(0.0).min(100.0);
     if nr==0 && nh==0 && nrl>0 { total = total.min(15.0); }
 
-    // v1.1: Calibrated KIE prediction
-    // Radical C-H: KIE range 3-81, mapped via sigmoid from QVS
-    // Hydride: KIE range 3-15
-    // Relay/none: KIE ≈ 1
-    let predicted_kie = if total < 8.0 { 1.0 } else if nr > 0 {
-        // Radical: use calibrated power law from literature KIEs
-        let t = (total / 100.0).powf(0.8);
-        3.0 + t * 77.0  // maps QVS 8→~5, QVS 50→~33, QVS 80→~55, QVS 100→80
-    } else if nh > 0 {
-        let t = (total / 100.0).powf(0.9);
-        2.0 + t * 13.0  // maps QVS→3-15 range
-    } else { 1.0 + (total / 100.0) * 1.0 };
+    // v1.4: KIE-Schätzung pro Reaktionsklasse = geometrisches Mittel der DEV-Literaturwerte
+    // (ohne Ausschlüsse RNR/COMT). Innerhalb einer Klasse korreliert QVS NICHT mit dem KIE
+    // (DEV: Spearman -0,41 radikal, -0,13 Hydrid), daher kein QVS-Term mehr.
+    // Typischer Fehler (Leave-one-out): Faktor ~1,8. Aussage: Größenordnung, keine Rangfolge.
+    let predicted_kie = if total < 8.0 { 1.0 } else if nr > 0 { 16.5 } else if nh > 0 { 5.0 } else { 1.0 };
 
     let (class, warning) = if total >= 40.0 {
         ("QUANTUM-CRITICAL".into(), format!("KIE≈{:.1}. Enhancement {:.0}x. Classical docking unreliable.", predicted_kie, me))

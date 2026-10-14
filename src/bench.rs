@@ -116,7 +116,7 @@ fn spearman(x: &[f64], y: &[f64]) -> f64 {
 }
 
 #[derive(Clone)]
-struct Row { name: &'static str, pdb: &'static str, label: Label, kie: f64, v12: f64, v13: f64, kie13: f64, base: bool, ev: Evidence }
+struct Row { name: &'static str, pdb: &'static str, label: Label, kie: f64, v12: f64, v13: f64, kie13: f64, base: bool, ev: Evidence, cls: &'static str }
 
 fn run(set: &[Case]) -> Vec<Row> {
     let cache = format!("{}/.meg-apsu-pdb-cache", env::var("HOME").unwrap_or("/tmp".into()));
@@ -127,7 +127,8 @@ fn run(set: &[Case]) -> Vec<Row> {
         V13.store(false, Ordering::SeqCst); let (_,_,_,q12,_) = full_scan(&pdb);
         V13.store(true,  Ordering::SeqCst); let (_,_,_,q13,_) = full_scan(&pdb);
         rows.push(Row{ name:c.name, pdb:c.pdb, label:c.label, kie:c.kie, v12:q12.total, v13:q13.total,
-            kie13:q13.predicted_kie, base: baseline(&pdb), ev: evidence(c) });
+            kie13:q13.predicted_kie, base: baseline(&pdb), ev: evidence(c),
+            cls: if q13.n_radical > 0 { "radical" } else if q13.n_hydride > 0 { "hydride" } else { "other" } });
     }
     rows
 }
@@ -194,6 +195,16 @@ fn split_report(title: &str, rows: &[Row]) {
 pub fn bench(which: &str) {
     match which {
         "dev" => { let r = run(&dev_set()); split_report("DEV-SET (Entwicklung)", &r); }
+        "dev-csv" => {
+            let r = run(&dev_set());
+            let mut out = String::from("name,pdb,label,evidence,cls,qvs13,kie_lit,kie_pred\n");
+            for x in &r {
+                let l = match x.label { Label::Tunneling=>"T", Label::Classical=>"K", Label::Control=>"C" };
+                let e = match x.ev { Evidence::Stark=>"stark", Evidence::Unsicher=>"unsicher", Evidence::Ausgeschlossen=>"aus" };
+                out += &format!("{},{},{},{},{},{:.2},{:.2},{:.2}\n", x.name, x.pdb, l, e, x.cls, x.v13, x.kie, x.kie13);
+            }
+            let _ = fs::write("apsu_dev.csv", out); eprintln!("  apsu_dev.csv geschrieben");
+        }
         "test" => {
             eprintln!("\n  ⚠ TEST-SET: eingefroren. Nur einmal nach Abschluss der Entwicklung auswerten.");
             let r = run(&test_set()); split_report("TEST-SET (eingefroren, nach Familie getrennt)", &r);
