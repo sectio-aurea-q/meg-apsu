@@ -30,6 +30,8 @@ fn evidence(c: &Case) -> Evidence {
         Label::Classical => match c.name { "TIM" | "CA-II" => Evidence::Unsicher, _ => Evidence::Stark },
         Label::Tunneling => match c.name {
             "RNR" | "COMT" => Evidence::Ausgeschlossen,
+            "GluMut" => Evidence::Stark,
+            "DiolDH" => Evidence::Unsicher,
             "DHFR" | "TS" | "LADH" | "TMADH" | "PETNR" | "MR" => Evidence::Stark,
             _ if c.kie >= 10.0 => Evidence::Stark,
             _ => Evidence::Unsicher,
@@ -78,6 +80,37 @@ fn test_set() -> Vec<Case> {
     v.extend(from_targets(crate::held_neg(), Label::Classical));
     v.extend(test_controls()); v
 }
+
+// ═══ TEST-SET v1.4 — EINGEFROREN 14.10.2026 ═══════════════════════════
+// Nur Familien, die weder in DEV noch im alten Test-Set vorkommen. Quellen (DOI):
+//  MCM 10.1098/rstb.2006.1866 · GluMut 10.1021/bi1001695 · DiolDH 10.1021/ic102352b
+//  MCR 10.1021/ja406485z · sGDH 10.1021/bi992810x · MTHFR 10.1021/bi00317a027
+//  Pin1 10.1021/bi400700b · NA 10.1134/s0006297920040094 · T7Lig 10.1093/nar/gkz596
+//  GST 10.1073/pnas.1903297116 · SrtA 10.1039/d0cs01148g · CM 10.1039/d3cp06100k
+// kie: 0.0 = kein Literaturwert (nicht in KIE-Korrelation). Nur EINMAL auswerten.
+fn test14_set() -> Vec<Case> { vec![
+    Case{name:"MCM",        pdb:"4REQ", kie:35.6, label:Label::Tunneling}, // B12, KIE 35,6 (20 °C)
+    Case{name:"GluMut",     pdb:"1I9C", kie:0.0,  label:Label::Tunneling}, // B12, A_H/A_D = 0,17
+    Case{name:"DiolDH",     pdb:"1DIO", kie:10.0, label:Label::Tunneling}, // B12, Quelle schwach
+    Case{name:"MCR",        pdb:"1MRO", kie:2.44, label:Label::Tunneling}, // Ni-F430
+    Case{name:"sGDH",       pdb:"1CQ1", kie:7.8,  label:Label::Tunneling}, // PQQ
+    Case{name:"MTHFR",      pdb:"1B5T", kie:4.78, label:Label::Tunneling}, // FAD
+    Case{name:"ChorMut",    pdb:"2CHT", kie:1.0,  label:Label::Classical}, // Claisen, kein C-H
+    Case{name:"Pin1",       pdb:"1PIN", kie:1.0,  label:Label::Classical}, // Amid-Rotation
+    Case{name:"Neuramin",   pdb:"2BAT", kie:1.0,  label:Label::Classical}, // Glykosyl-Intermediat
+    Case{name:"BetaGal",    pdb:"1DP0", kie:1.0,  label:Label::Classical}, // Glykosidase
+    Case{name:"T7Ligase",   pdb:"1A0I", kie:1.0,  label:Label::Classical}, // Phosphoryltransfer
+    Case{name:"GST-P1",     pdb:"10GS", kie:1.0,  label:Label::Classical}, // Thiolat-Addition
+    Case{name:"SortaseA",   pdb:"1T2P", kie:1.0,  label:Label::Classical}, // Transpeptidierung
+    Case{name:"HiPIP",      pdb:"1ISU", kie:1.0,  label:Label::Control},
+    Case{name:"Cyt c'",     pdb:"1E85", kie:1.0,  label:Label::Control},
+    Case{name:"Nitrophorin",pdb:"1NP1", kie:1.0,  label:Label::Control},
+    Case{name:"HasA",       pdb:"1B2V", kie:1.0,  label:Label::Control},
+    Case{name:"Cyt f",      pdb:"1HCZ", kie:1.0,  label:Label::Control},
+    Case{name:"Rieske",     pdb:"1RIE", kie:1.0,  label:Label::Control},
+    Case{name:"H-NOX",      pdb:"1U55", kie:1.0,  label:Label::Control},
+    Case{name:"FixL",       pdb:"1DRM", kie:1.0,  label:Label::Control},
+]}
 
 // Triviale Baseline: "Bindet das Protein irgendeinen Redox-Kofaktor oder ein Redox-Metall?"
 // Wenn ein Modell diese Baseline nicht schlägt, misst es nichts darüber hinaus.
@@ -175,7 +208,7 @@ fn report(title: &str, rows: &[Row]) {
         eprintln!("\n  Kontrollen fälschlich positiv: v1.2 {}/{}  ·  v1.3 {}/{}", f12, ctrl.len(), f13, ctrl.len());
     }
     // KIE-Vorhersage nur auf Tunneling-Enzymen (Rangkorrelation)
-    let pos: Vec<&Row> = rows.iter().filter(|r| r.label==Label::Tunneling).collect();
+    let pos: Vec<&Row> = rows.iter().filter(|r| r.label==Label::Tunneling && r.kie > 0.0).collect();
     let lit: Vec<f64> = pos.iter().map(|r| r.kie).collect();
     let pk: Vec<f64> = pos.iter().map(|r| r.kie13).collect();
     eprintln!("  KIE-Rangkorrelation v1.3 (Spearman ρ, n={}): {:.3}", pos.len(), spearman(&lit, &pk));
@@ -209,6 +242,10 @@ pub fn bench(which: &str) {
             eprintln!("\n  ⚠ TEST-SET: eingefroren. Nur einmal nach Abschluss der Entwicklung auswerten.");
             let r = run(&test_set()); split_report("TEST-SET (eingefroren, nach Familie getrennt)", &r);
         }
-        _ => eprintln!("  meg-apsu bench dev|test"),
+        "test14" => {
+            eprintln!("\n  ⚠ TEST-SET v1.4: eingefroren 14.10.2026. Nur EINMAL auswerten.");
+            let r = run(&test14_set()); split_report("TEST-SET v1.4 (neue Familien)", &r);
+        }
+        _ => eprintln!("  meg-apsu bench dev|test|test14"),
     }
 }
