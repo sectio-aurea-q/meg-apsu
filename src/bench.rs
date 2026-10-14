@@ -16,6 +16,27 @@ enum Label { Tunneling, Classical, Control }
 
 struct Case { name: &'static str, pdb: &'static str, kie: f64, label: Label }
 
+// v1.4: Wie gut ist das Label belegt? (vorab festgelegte Regel, nicht nach Ergebnissen)
+//  Stark: KIE >= 10 (über semiklassischem Maximum) ODER Tunneling-Nachweis per
+//         Temperaturabhängigkeit / Swain-Schaad in der Literatur (Quellen vor Veröffentlichung mit DOI belegen)
+//  Ausgeschlossen: RNR (1MXR = R2, H-Abstraktion liegt in R1), COMT (Methyltransfer, kein H-Transfer)
+//  Unsicher: KIE < 10 ohne weiteren Nachweis; TIM/CA-II (echte Protonentransfers, "klassisch" unbelegt)
+#[derive(Clone, Copy, PartialEq)]
+enum Evidence { Stark, Unsicher, Ausgeschlossen }
+
+fn evidence(c: &Case) -> Evidence {
+    match c.label {
+        Label::Control => Evidence::Stark,
+        Label::Classical => match c.name { "TIM" | "CA-II" => Evidence::Unsicher, _ => Evidence::Stark },
+        Label::Tunneling => match c.name {
+            "RNR" | "COMT" => Evidence::Ausgeschlossen,
+            "DHFR" | "TS" | "LADH" | "TMADH" | "PETNR" | "MR" => Evidence::Stark,
+            _ if c.kie >= 10.0 => Evidence::Stark,
+            _ => Evidence::Unsicher,
+        },
+    }
+}
+
 fn from_targets(v: Vec<Target>, l: Label) -> Vec<Case> {
     v.into_iter().map(|t| Case { name: t.name, pdb: t.pdb, kie: t.kie, label: l }).collect()
 }
@@ -94,7 +115,8 @@ fn spearman(x: &[f64], y: &[f64]) -> f64 {
     if sxx>0.0 && syy>0.0 { sxy/(sxx*syy).sqrt() } else { 0.0 }
 }
 
-struct Row { name: &'static str, pdb: &'static str, label: Label, kie: f64, v12: f64, v13: f64, kie13: f64, base: bool }
+#[derive(Clone)]
+struct Row { name: &'static str, pdb: &'static str, label: Label, kie: f64, v12: f64, v13: f64, kie13: f64, base: bool, ev: Evidence }
 
 fn run(set: &[Case]) -> Vec<Row> {
     let cache = format!("{}/.meg-apsu-pdb-cache", env::var("HOME").unwrap_or("/tmp".into()));
@@ -105,7 +127,7 @@ fn run(set: &[Case]) -> Vec<Row> {
         V13.store(false, Ordering::SeqCst); let (_,_,_,q12,_) = full_scan(&pdb);
         V13.store(true,  Ordering::SeqCst); let (_,_,_,q13,_) = full_scan(&pdb);
         rows.push(Row{ name:c.name, pdb:c.pdb, label:c.label, kie:c.kie, v12:q12.total, v13:q13.total,
-            kie13:q13.predicted_kie, base: baseline(&pdb) });
+            kie13:q13.predicted_kie, base: baseline(&pdb), ev: evidence(c) });
     }
     rows
 }
@@ -158,12 +180,23 @@ fn report(title: &str, rows: &[Row]) {
     eprintln!("  KIE-Rangkorrelation v1.3 (Spearman ρ, n={}): {:.3}", pos.len(), spearman(&lit, &pk));
 }
 
+fn split_report(title: &str, rows: &[Row]) {
+    let n = |e: Evidence| rows.iter().filter(|r| r.ev == e).count();
+    eprintln!("\n  Label-Belege: stark {} · unsicher {} · ausgeschlossen {}",
+        n(Evidence::Stark), n(Evidence::Unsicher), n(Evidence::Ausgeschlossen));
+    report(&format!("{} – wie bisher", title), rows);
+    let ohne: Vec<Row> = rows.iter().filter(|r| r.ev != Evidence::Ausgeschlossen).cloned().collect();
+    report(&format!("{} – ohne Ausschlüsse", title), &ohne);
+    let stark: Vec<Row> = rows.iter().filter(|r| r.ev == Evidence::Stark).cloned().collect();
+    report(&format!("{} – nur starke Labels", title), &stark);
+}
+
 pub fn bench(which: &str) {
     match which {
-        "dev" => { let r = run(&dev_set()); report("DEV-SET (Entwicklung)", &r); }
+        "dev" => { let r = run(&dev_set()); split_report("DEV-SET (Entwicklung)", &r); }
         "test" => {
             eprintln!("\n  ⚠ TEST-SET: eingefroren. Nur einmal nach Abschluss der Entwicklung auswerten.");
-            let r = run(&test_set()); report("TEST-SET (eingefroren, nach Familie getrennt)", &r);
+            let r = run(&test_set()); split_report("TEST-SET (eingefroren, nach Familie getrennt)", &r);
         }
         _ => eprintln!("  meg-apsu bench dev|test"),
     }
