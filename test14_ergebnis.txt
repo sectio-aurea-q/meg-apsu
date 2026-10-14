@@ -1,0 +1,99 @@
+[36m  MEG-APSU v1.2.1 — Quantum Drug Target Analyzer
+  sectio-aurea-q · MEGALODON Research[0m
+
+
+  ⚠ TEST-SET v1.4: eingefroren 14.10.2026. Nur EINMAL auswerten.
+
+  Label-Belege: stark 17 · unsicher 4 · ausgeschlossen 0
+
+  ═══ TEST-SET v1.4 (neue Familien) – wie bisher (21 Proteine) ═══
+  Protein          PDB   Klasse       v1.2   v1.3  Base  
+  MCM              4REQ  Tunneling   58.0    0.0✗   ja 
+  GluMut           1I9C  Tunneling   58.0    0.0✗   ja 
+  DiolDH           1DIO  Tunneling    0.0✗   0.0✗   ja 
+  MCR              1MRO  Tunneling    0.0✗   0.0✗ nein✗
+  sGDH             1CQ1  Tunneling    0.0✗   0.0✗ nein✗
+  MTHFR            1B5T  Tunneling   47.0   47.0    ja 
+  ChorMut          2CHT  Klassisch    0.0    0.0  nein 
+  Pin1             1PIN  Klassisch    6.4    6.4  nein 
+  Neuramin         2BAT  Klassisch    0.0    0.0  nein 
+  BetaGal          1DP0  Klassisch    0.0    0.0  nein 
+  T7Ligase         1A0I  Klassisch    0.0    0.0  nein 
+  GST-P1           10GS  Klassisch    6.4    6.4  nein 
+  SortaseA         1T2P  Klassisch    0.0    0.0  nein 
+  HiPIP            1ISU  Kontrolle    0.0    0.0    ja✗
+  Cyt c'           1E85  Kontrolle    9.4    9.4    ja✗
+  Nitrophorin      1NP1  Kontrolle   72.0✗  62.0✗   ja✗
+  HasA             1B2V  Kontrolle   66.0✗   6.4    ja✗
+  Cyt f            1HCZ  Kontrolle   68.0✗   0.0    ja✗
+  Rieske           1RIE  Kontrolle   74.0✗  66.0✗   ja✗
+  H-NOX            1U55  Kontrolle   68.0✗   0.0    ja✗
+  FixL             1DRM  Kontrolle   66.0✗   6.4    ja✗
+
+  Modell                 Sens.     Spez. Genauigk.  95%-KI Genauigk.  Konfusion
+  v1.2 (alt)             50.0%     60.0%     57.1%     36.5– 75.5%  TP=3 FN=3 TN=9 FP=6
+  v1.3 (neu)             16.7%     86.7%     66.7%     45.4– 82.8%  TP=1 FN=5 TN=13 FP=2
+  Kofaktor-Baseline      66.7%     46.7%     52.4%     32.4– 71.7%  TP=4 FN=2 TN=7 FP=8
+
+  Kontrollen fälschlich positiv: v1.2 6/8  ·  v1.3 2/8
+  KIE-Rangkorrelation v1.3 (Spearman ρ, n=5): -0.354
+
+  ═══ TEST-SET v1.4 (neue Familien) – ohne Ausschlüsse (21 Proteine) ═══
+  Protein          PDB   Klasse       v1.2   v1.3  Base  
+  MCM              4REQ  Tunneling   58.0    0.0✗   ja 
+  GluMut           1I9C  Tunneling   58.0    0.0✗   ja 
+  DiolDH           1DIO  Tunneling    0.0✗   0.0✗   ja 
+  MCR              1MRO  Tunneling    0.0✗   0.0✗ nein✗
+  sGDH             1CQ1  Tunneling    0.0✗   0.0✗ nein✗
+  MTHFR            1B5T  Tunneling   47.0   47.0    ja 
+  ChorMut          2CHT  Klassisch    0.0    0.0  nein 
+  Pin1             1PIN  Klassisch    6.4    6.4  nein 
+  Neuramin         2BAT  Klassisch    0.0    0.0  nein 
+  BetaGal          1DP0  Klassisch    0.0    0.0  nein 
+  T7Ligase         1A0I  Klassisch    0.0    0.0  nein 
+  GST-P1           10GS  Klassisch    6.4    6.4  nein 
+  SortaseA         1T2P  Klassisch    0.0    0.0  nein 
+  HiPIP            1ISU  Kontrolle    0.0    0.0    ja✗
+  Cyt c'           1E85  Kontrolle    9.4    9.4    ja✗
+  Nitrophorin      1NP1  Kontrolle   72.0✗  62.0✗   ja✗
+  HasA             1B2V  Kontrolle   66.0✗   6.4    ja✗
+  Cyt f            1HCZ  Kontrolle   68.0✗   0.0    ja✗
+  Rieske           1RIE  Kontrolle   74.0✗  66.0✗   ja✗
+  H-NOX            1U55  Kontrolle   68.0✗   0.0    ja✗
+  FixL             1DRM  Kontrolle   66.0✗   6.4    ja✗
+
+  Modell                 Sens.     Spez. Genauigk.  95%-KI Genauigk.  Konfusion
+  v1.2 (alt)             50.0%     60.0%     57.1%     36.5– 75.5%  TP=3 FN=3 TN=9 FP=6
+  v1.3 (neu)             16.7%     86.7%     66.7%     45.4– 82.8%  TP=1 FN=5 TN=13 FP=2
+  Kofaktor-Baseline      66.7%     46.7%     52.4%     32.4– 71.7%  TP=4 FN=2 TN=7 FP=8
+
+  Kontrollen fälschlich positiv: v1.2 6/8  ·  v1.3 2/8
+  KIE-Rangkorrelation v1.3 (Spearman ρ, n=5): -0.354
+
+  ═══ TEST-SET v1.4 (neue Familien) – nur starke Labels (17 Proteine) ═══
+  Protein          PDB   Klasse       v1.2   v1.3  Base  
+  MCM              4REQ  Tunneling   58.0    0.0✗   ja 
+  GluMut           1I9C  Tunneling   58.0    0.0✗   ja 
+  ChorMut          2CHT  Klassisch    0.0    0.0  nein 
+  Pin1             1PIN  Klassisch    6.4    6.4  nein 
+  Neuramin         2BAT  Klassisch    0.0    0.0  nein 
+  BetaGal          1DP0  Klassisch    0.0    0.0  nein 
+  T7Ligase         1A0I  Klassisch    0.0    0.0  nein 
+  GST-P1           10GS  Klassisch    6.4    6.4  nein 
+  SortaseA         1T2P  Klassisch    0.0    0.0  nein 
+  HiPIP            1ISU  Kontrolle    0.0    0.0    ja✗
+  Cyt c'           1E85  Kontrolle    9.4    9.4    ja✗
+  Nitrophorin      1NP1  Kontrolle   72.0✗  62.0✗   ja✗
+  HasA             1B2V  Kontrolle   66.0✗   6.4    ja✗
+  Cyt f            1HCZ  Kontrolle   68.0✗   0.0    ja✗
+  Rieske           1RIE  Kontrolle   74.0✗  66.0✗   ja✗
+  H-NOX            1U55  Kontrolle   68.0✗   0.0    ja✗
+  FixL             1DRM  Kontrolle   66.0✗   6.4    ja✗
+
+  Modell                 Sens.     Spez. Genauigk.  95%-KI Genauigk.  Konfusion
+  v1.2 (alt)            100.0%     60.0%     64.7%     41.3– 82.7%  TP=2 FN=0 TN=9 FP=6
+  v1.3 (neu)              0.0%     86.7%     76.5%     52.7– 90.4%  TP=0 FN=2 TN=13 FP=2
+  Kofaktor-Baseline     100.0%     46.7%     52.9%     31.0– 73.8%  TP=2 FN=0 TN=7 FP=8
+
+  Kontrollen fälschlich positiv: v1.2 6/8  ·  v1.3 2/8
+  KIE-Rangkorrelation v1.3 (Spearman ρ, n=1): 0.000
