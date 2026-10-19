@@ -1,9 +1,9 @@
 [package]
 name = "meg-apsu"
-version = "1.2.1"
+version = "1.5.0"
 edition = "2021"
 authors = ["sectio-aurea-q <meg.depth@proton.me>"]
-description = "Quantum Drug Target Analyzer — Structure-based quantum vulnerability scoring for enzyme drug targets"
+description = "Structure-based triage of hydrogen-tunnelling enzymes from PDB files"
 repository = "https://github.com/sectio-aurea-q/meg-apsu"
 license = "MIT"
 keywords = ["quantum", "biology", "drug-discovery", "enzyme", "tunneling"]

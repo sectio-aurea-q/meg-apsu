@@ -1,80 +1,114 @@
-# 🦈 MEGALODON — Automated Cryptographic Risk Platform
+# MEG-APSU
 
-**The world's first unified cryptographic security tool combining memory scanning, timing analysis, lattice reduction, RSA factorization, and continuous monitoring in a single Rust binary.**
+**Structure-based triage of hydrogen-tunnelling enzymes.**
 
-*By sectio-aurea-q | MEGALODON Research Program*
+Given a PDB structure, MEG-APSU decides in milliseconds whether the active site contains
+a catalytically competent centre for hydrogen transfer — radical C–H abstraction or
+hydride transfer, the reaction classes in which enzymatic H-tunnelling is observed. The
+intended use is to rank enzymes *before* an experiment: which ones are worth a kinetic
+isotope effect (KIE) measurement or a QM/MM study with tunnelling.
 
-## Installation
+We are not aware of a published tool for this specific task. The closest related work
+classifies metal sites as enzymatic or non-enzymatic with machine learning
+(MAHOMES; Feehan, Franklin & Slusky, *Nat. Commun.* 2021, doi:10.1038/s41467-021-24070-3); MEG-APSU's
+catalysis filter addresses a similar sub-question with explicit physical rules.
+
+## How it works
+
+1. **Motif rules.** Heme, catalytic metals (Fe, Cu, Mn, Co, Mo), NAD(P)/FAD/FMN,
+   quinone cofactors, folates, pterins, SAM, Ser/Cys-His-Asp triads, Zn sites and the
+   2-His-1-carboxylate facial triad are located in the structure and assigned a
+   reaction class (radical C–H, hydride, proton relay, Lewis acid).
+2. **Catalysis filter (v1.3).** A metal or heme centre counts only if its geometry allows
+   catalysis: saturated coordination, Fe–S clusters, type-1 Cu, heme with two axial
+   protein ligands, or a globin-like heme without a distal push–pull partner are
+   classified as electron-transfer or transport sites and excluded.
+3. **Score.** An APSU score from 0 to 100 combines the motif counts, substrate presence
+   and a class prior. Score ≥ 10 counts as positive.
+
+   | score | class |
+   |---|---|
+   | ≥ 40 | `TUNNELLING-LIKELY` |
+   | 10–40 | `TUNNELLING-POSSIBLE` |
+   | < 10 | `TUNNELLING-UNLIKELY` |
+
+**What the score is not.** The class prior comes from a two-level Lindblad model whose
+barrier and distance are fixed per motif type; it is a constant per motif type and is
+*not* computed from atomic coordinates. MEG-APSU therefore does not predict tunnelling
+factors. The KIE output is a per-class order of magnitude (geometric mean of literature
+values), not a prediction for the individual enzyme.
+
+## Benchmark
+
+All test sets are split by protein family and were frozen before evaluation. Each model
+is compared with a trivial baseline: "does the structure contain any redox cofactor or
+redox metal?" A model that does not beat this baseline measures nothing beyond it.
+
+| set | proteins | MEG-APSU accuracy (95 % CI) | baseline | non-catalytic redox controls flagged |
+|---|---|---|---|---|
+| DEV (development) | 66 | 98.5 % (91.9–99.7) | 86.4 % | 0 / 7 |
+| TEST, frozen 2026-10-06 | 40 | **92.5 % (80.1–97.4)** | 75.0 % | 3 / 10 |
+| TEST v1.4, frozen 2026-10-14, new families | 21 | **66.7 % (45.4–82.8)** | 52.4 % | 2 / 8 |
+
+On TEST v1.4, sensitivity is **1 of 6**: enzymes with cofactors outside the motif list
+(B12, Ni-F430, PQQ) are missed. This is the main known limitation. Because TEST v1.4
+has now been seen, any extension of the cofactor list must be evaluated on a new frozen
+set.
+
+Reproduce:
 
 ```bash
-git clone https://github.com/sectio-aurea-q/megalodon.git
-cd megalodon
 cargo build --release
+./target/release/meg-apsu bench test      # frozen 2026-10-06
+./target/release/meg-apsu bench test14    # frozen 2026-10-14
+./target/release/meg-apsu bench dev
 ```
 
-Binary: `target/release/megalodon`
+Structures are downloaded from RCSB on first use and cached in `~/.meg-apsu-pdb-cache`.
 
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `megalodon scan` | 🔍 Scan process memory for exposed secrets (keys, tokens, passwords) |
-| `megalodon timing` | ⏱️ Timing side-channel analysis on crypto implementations |
-| `megalodon audit` | 🔐 Scan files/code for hardcoded secrets and weak algorithms |
-| `megalodon tls` | 🌐 TLS endpoint analysis (version, cipher, cert, quantum risk) |
-| `megalodon keys` | 🔑 Key file analysis (strength, encryption, quantum vulnerability) |
-| `megalodon factor` | 🔓 RSA factorization (Trial Division, Fermat, Pollard-Rho, p-1) |
-| `megalodon lattice` | 🧬 Lattice reduction (LLL, BKZ) for post-quantum analysis |
-| `megalodon monitor` | 🔄 Continuous 24/7 monitoring with delta detection |
-| `megalodon health` | 🏥 Full infrastructure health check (runs all modules) |
-| `megalodon report` | 📊 Generate HTML/JSON/Markdown risk reports |
-
-## What Makes MEGALODON Unique
-
-No other tool on earth combines these six capabilities in one binary:
-
-1. **Memory Secret Scanning** — Live process memory analysis (P2 technology, proven: 71 findings across 8 apps)
-2. **Timing Side-Channel Analysis** — Automated detection with Welch's t-test and Cohen's d (P1 technology, proven: timing leak in CRYSTALS-Kyber)
-3. **RSA Factorization Suite** — Fermat, Pollard-Rho, Pollard p-1 with weakness analysis
-4. **Lattice Reduction Engine** — Pure Rust LLL and BKZ implementation for post-quantum crypto analysis
-5. **Continuous Monitoring** — 24/7 scanning with delta detection, new/resolved alerts
-6. **Quantum Readiness Scoring** — Every finding flagged for quantum vulnerability, organization-level grading (A+ to F)
-
-## Quick Start
+## Usage
 
 ```bash
-# Scan a project for exposed secrets
-megalodon audit --target ./my-project
-
-# Check TLS configuration
-megalodon tls --target example.com
-
-# Factor a weak RSA modulus
-megalodon factor --target 1000000016000000063 --method auto
-
-# Reduce a lattice basis
-megalodon lattice --target basis.txt --algorithm lll
-
-# Start continuous monitoring
-megalodon monitor --target ./my-project --interval 60
-
-# Full health check
-megalodon health --target ./infrastructure
+./target/release/meg-apsu scan 1YGE.pdb            # one structure
+./target/release/meg-apsu scan 1YGE.pdb --json
+./target/release/meg-apsu batch ./structures/      # every .pdb in a directory
 ```
 
-## Research Background
+## Data
 
-MEGALODON is built on real-world security research:
+- `data/tunnelling_signatures.csv` — experimental signatures of H-tunnelling for 55
+  enzymes (H/D KIE, A_H/A_D, temperature dependence of the KIE, Swain–Schaad exponent)
+  with short references. References are not yet DOI-checked.
+- `data/fda_drug_target_enzymes.csv` — 115 enzyme drug targets with PDB entries, for
+  batch triage.
 
-- **P1**: Timing oracle on CRYSTALS-Kyber reference implementation — ~1200-1500ns leak, Cohen's d = 0.63-0.73
-- **P2**: Process memory scanner for Apple Silicon — 71 findings across 16 apps (8 vulnerable), including Signal, Chrome, 1Password, Safari
+## Limitations
 
-Responsible disclosure to Signal, Chromium, Tor Project, Telegram, Apple, and 1Password was initiated March 10, 2026.
+- Cofactor coverage: B12, F430, PQQ and other cofactors outside the motif list are not
+  recognised.
+- Apo structures, or structures without a bound substrate or cofactor, can be missed.
+- The score does not rank enzymes by KIE size (TEST v1.4: Spearman ρ = −0.35, n = 5).
+- Small test sets: confidence intervals are wide.
+
+## Changes in v1.5
+
+Labels and commands only; every score is bit-identical to v1.4 (checked on 127
+structures and all three benchmarks).
+
+- New description; classes renamed to `TUNNELLING-LIKELY / POSSIBLE / UNLIKELY`, aligned
+  with the benchmark threshold.
+- The Lindblad output is reported as a class prior and documented as structure-independent.
+- Removed the commands `validate` and `blind` (superseded by `bench`), `proof` and
+  `drugbank`, together with `how-it-works.html`. They made claims about classical
+  mechanics, docking errors and drug withdrawals that the method does not support.
+  Their literature data are kept in `data/`. Everything remains in the git history.
+
+## About
+
+Written and maintained by Sabrina Hackfort (sectio-aurea-q, MEGALODON Research),
+ORCID [0009-0007-7458-2487](https://orcid.org/0009-0007-7458-2487), as an independent
+researcher. Built on a self-repaired MacBook.
 
 ## License
 
 MIT
-
-## Author
-
-sectio-aurea-q | meg.depth@proton.me | MEGALODON Research Program

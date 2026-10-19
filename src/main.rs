@@ -1,8 +1,14 @@
-// MEG-APSU v1.2.1 — Quantum Drug Target Analyzer
+// MEG-APSU — structure-based triage of hydrogen-tunnelling enzymes
 // sectio-aurea-q · MEGALODON Research · 2026
-// "Does this drug target use quantum mechanics?"
-// Built on a self-repaired MacBook from eBay Kleinanzeigen.
 //
+// Question: does the active site in this PDB structure contain a catalytically
+// competent centre for hydrogen transfer (radical C-H abstraction, hydride transfer)?
+//
+// Core (sectio-aurea-q): motif rules on the structure (classify_sites) plus a physical
+// filter that separates catalytic metal/heme centres from electron-transfer and
+// transport sites (metal_catalytic, v1.3). Fast, explainable, no training.
+//
+// v1.5 (19.10.2026): labels and commands only — every score is bit-identical to v1.4.
 // v1.2: Nucleotide-gated kinase exclusion, SAM methyltransferase, 3 PDB fixes
 use ndarray::Array2;
 use num_complex::Complex64;
@@ -66,6 +72,11 @@ fn noise_2site(sys: &mut Sys, temp: f64) {
     sys.add(lv, 1.0/200.0e-15*0.02);
     for i in 0..n { let mut ls = Rho::zeros((n,n)); ls[[i,i]] = cr(1.0); sys.add(ls, 1.0/1.0e-12*0.005); }
 }
+/// Class prior from a two-level Lindblad model.
+/// NOTE (v1.5): barrier and distance are FIXED per motif type (see RxnType::barrier_ev and
+/// the class distances in compute_qvs), not read from atomic coordinates. The result is
+/// therefore a constant per motif type and enters the score as a class prior. A version
+/// that takes donor-acceptor geometry from the structure is planned (v2.0).
 fn lindblad_enh(barrier_ev: f64, dist_ang: f64, temp: f64) -> f64 {
     let n = 2; let omega0 = 1e13;
     let tw = (dist_ang - 1.0).max(0.2) * ANG_M;
@@ -184,7 +195,7 @@ fn is_metal(e: &str) -> bool { matches!(e, "FE"|"CU"|"MN"|"CO"|"MO"|"ZN"|"NI"|"M
 // Austauschbare Kleinliganden: Wasser/Hydroxid/Oxo und zweiatomige Gase bzw. Anionen.
 // Sie besetzen die offene Stelle nur vorübergehend → Stelle gilt als offen, und sie sind kein Substrat.
 fn is_exchangeable(r: &str) -> bool { matches!(r, "HOH"|"WAT"|"OH"|"O"|"OXO"|"PER"|"OXY"|"O2"|"CMO"|"NO"|"CYN"|"AZI"|"F"|"CL") }
-pub fn metal_catalytic(atoms: &[Atom], mi: usize) -> bool {
+fn metal_catalytic(atoms: &[Atom], mi: usize) -> bool {
     let m = &atoms[mi];
     let lig: Vec<usize> = atoms.iter().enumerate()
         .filter(|(j,a)| *j != mi && !is_metal(&a.elem) && !(a.is_het && is_exchangeable(&a.res)) && adist(m, a) < LIG_CUT)
@@ -467,7 +478,10 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
     dd
 }
 
-// ═══ QVS + KIE ══════════════════════════════════════════════════════════
+// ═══ APSU SCORE + KIE CLASS ESTIMATE ═══════════════════════════════════════
+// Score 0-100 from: class prior (Lindblad, fixed per motif type) + motif counts + substrate.
+// Decision threshold as in the frozen benchmarks.
+pub const SCORE_THRESHOLD: f64 = 10.0;
 #[derive(Clone, Debug, Serialize)]
 struct QVS { total: f64, max_enhancement: f64, primary_rxn: String, predicted_kie: f64,
     n_radical: usize, n_hydride: usize, n_relay: usize, n_lewis: usize,
@@ -499,14 +513,14 @@ fn compute_qvs(sites: &[ActiveSite], temp: f64) -> QVS {
     // Typischer Fehler (Leave-one-out): Faktor ~1,8. Aussage: Größenordnung, keine Rangfolge.
     let predicted_kie = if total < 8.0 { 1.0 } else if nr > 0 { 16.5 } else if nh > 0 { 5.0 } else { 1.0 };
 
+    // v1.5: classes aligned with the benchmark decision (score >= SCORE_THRESHOLD = positive).
+    let _ = me;
     let (class, warning) = if total >= 40.0 {
-        ("QUANTUM-CRITICAL".into(), format!("KIE≈{:.1}. Enhancement {:.0}x. Classical docking unreliable.", predicted_kie, me))
-    } else if total >= 20.0 {
-        ("QUANTUM-INFLUENCED".into(), format!("KIE≈{:.1}. Enhancement {:.0}x. QM/MM recommended.", predicted_kie, me))
-    } else if total >= 8.0 {
-        ("QUANTUM-MARGINAL".into(), format!("KIE≈{:.1}. Minor quantum contribution.", predicted_kie))
+        ("TUNNELLING-LIKELY".into(), "Strong catalytic H-transfer site. Candidate for a KIE measurement; model with QM/MM including tunnelling.".to_string())
+    } else if total >= SCORE_THRESHOLD {
+        ("TUNNELLING-POSSIBLE".into(), "Catalytic H-transfer site present. A KIE measurement would decide.".to_string())
     } else {
-        ("CLASSICAL".into(), format!("KIE≈{:.1}. Classical. Standard methods OK.", predicted_kie))
+        ("TUNNELLING-UNLIKELY".into(), "No catalytic H-transfer site found.".to_string())
     };
 
     QVS { total, max_enhancement: me, primary_rxn: pr, predicted_kie,
@@ -521,6 +535,7 @@ fn full_scan(pdb: &str) -> (String, usize, Vec<ActiveSite>, QVS, f64) {
 }
 
 // ═══ DIAGNOSTIC ═════════════════════════════════════════════════════════
+#[allow(dead_code)]
 fn pdb_diag(pdb: &str, name: &str) {
     let (_, atoms) = parse_pdb(pdb);
     let metals: Vec<String> = atoms.iter().filter(|a| matches!(a.elem.as_str(),"FE"|"CU"|"MN"|"ZN"|"CO"|"MO"|"NI"|"MG"))
@@ -614,112 +629,25 @@ fn download(id: &str, cache: &str) -> Result<String, String> {
     if out.status.success() { let t = String::from_utf8_lossy(&out.stdout).to_string();
         let _ = fs::write(&p, &t); Ok(t) } else { Err(format!("HTTP: {}", id)) }
 }
-fn pearson(x: &[f64], y: &[f64]) -> f64 {
-    let n = x.len() as f64; if n < 3.0 { return 0.0; }
-    let mx = x.iter().sum::<f64>()/n; let my = y.iter().sum::<f64>()/n;
-    let (mut sxy,mut sxx,mut syy) = (0.0,0.0,0.0);
-    for i in 0..x.len() { let (dx,dy) = (x[i]-mx,y[i]-my); sxy+=dx*dy; sxx+=dx*dx; syy+=dy*dy; }
-    if sxx>0.0 && syy>0.0 { let r = sxy/(sxx*syy).sqrt(); r*r } else { 0.0 }
-}
-fn cohens_d(g1: &[f64], g2: &[f64]) -> f64 {
-    let (n1,n2) = (g1.len() as f64, g2.len() as f64);
-    if n1<2.0||n2<2.0 { return 0.0; }
-    let m1=g1.iter().sum::<f64>()/n1; let m2=g2.iter().sum::<f64>()/n2;
-    let v1=g1.iter().map(|x|(x-m1).powi(2)).sum::<f64>()/(n1-1.0);
-    let v2=g2.iter().map(|x|(x-m2).powi(2)).sum::<f64>()/(n2-1.0);
-    let sp=((v1*(n1-1.0)+v2*(n2-1.0))/(n1+n2-2.0)).sqrt();
-    if sp>1e-10{(m1-m2)/sp}else{0.0}
-}
-
-// ═══ VALIDATION ═════════════════════════════════════════════════════════
-fn validate() {
-    let t0 = Instant::now();
-    let cache = format!("{}/.meg-apsu-pdb-cache", env::var("HOME").unwrap_or("/tmp".into()));
-    let _ = fs::create_dir_all(&cache);
-    let pv = pos(); let nv = neg();
-    let np = pv.len(); let nn = nv.len();
-    eprintln!("\n  \x1b[36m\x1b[1m═══ MEG-APSU v1.2.1 — FULL VALIDATION ═══\x1b[0m");
-    eprintln!("  \x1b[2m{} positive + {} negative = {} targets · Calibrated KIE\x1b[0m\n", np, nn, np+nn);
-    let mut pq = Vec::new(); let mut pk = Vec::new(); let mut nq = Vec::new(); let mut pkie = Vec::new();
-    eprintln!("  \x1b[32m[POSITIVE: {} tunneling enzymes]\x1b[0m", np);
-    for (i,t) in pv.iter().enumerate() {
-        eprint!("  [{:2}/{}] {:5} {:10}", i+1, np, t.pdb, t.name);
-        match download(t.pdb, &cache) {
-            Ok(pdb) => {
-                let (_,_,sites,qvs,ms) = full_scan(&pdb);
-                let rad = sites.iter().filter(|s| s.rxn.contains("Radical")).count();
-                let hyd = sites.iter().filter(|s| s.rxn.contains("Hydride")).count();
-                let rel = sites.iter().filter(|s| s.rxn.contains("Relay")).count();
-                eprintln!(" QVS={:5.1} [{:18}] KIE≈{:5.1}(lit={:4.1}) rad={} hyd={} rel={} ({:.0}ms)",
-                    qvs.total, qvs.class, qvs.predicted_kie, t.kie, rad, hyd, rel, ms);
-                if qvs.total < 20.0 { pdb_diag(&pdb, t.name); }
-                pq.push(qvs.total); pk.push(t.kie); pkie.push(qvs.predicted_kie);
-            }
-            Err(e) => eprintln!(" \x1b[31mFAIL: {}\x1b[0m", e),
-        }
-    }
-    eprintln!("\n  \x1b[33m[NEGATIVE: {} classical enzymes]\x1b[0m", nn);
-    for (i,t) in nv.iter().enumerate() {
-        eprint!("  [{:2}/{}] {:5} {:10}", i+1, nn, t.pdb, t.name);
-        match download(t.pdb, &cache) {
-            Ok(pdb) => {
-                let (_,_,_,qvs,ms) = full_scan(&pdb);
-                eprintln!(" QVS={:5.1} [{:18}] KIE≈{:5.1} ({:.0}ms)", qvs.total, qvs.class, qvs.predicted_kie, ms);
-                if qvs.total >= 20.0 { pdb_diag(&pdb, t.name); }
-                nq.push(qvs.total);
-            }
-            Err(e) => eprintln!(" \x1b[31mFAIL: {}\x1b[0m", e),
-        }
-    }
-    let kr2 = pearson(&pk, &pkie); let qr2 = pearson(&pk, &pq);
-    let d = cohens_d(&pq, &nq);
-    let mut bt=20.0_f64; let mut bj=-1.0_f64;
-    for tc in (5..=80).map(|x| x as f64) {
-        let s = pq.iter().filter(|&&q|q>=tc).count() as f64/pq.len().max(1) as f64;
-        let sp = nq.iter().filter(|&&q|q<tc).count() as f64/nq.len().max(1) as f64;
-        if s+sp-1.0>bj { bj=s+sp-1.0; bt=tc; }
-    }
-    let tp=pq.iter().filter(|&&q|q>=bt).count(); let fnc=pq.len()-tp;
-    let tn=nq.iter().filter(|&&q|q<bt).count(); let fp=nq.len()-tn;
-    let pm=pq.iter().sum::<f64>()/pq.len().max(1) as f64;
-    let nm=nq.iter().sum::<f64>()/nq.len().max(1) as f64;
-    let mut conc=0usize; let mut tied=0usize;
-    for &pv in &pq { for &nv in &nq { if pv>nv{conc+=1;}else if(pv-nv).abs()<0.01{tied+=1;} }}
-    let auc=(conc as f64+0.5*tied as f64)/(pq.len()*nq.len()).max(1) as f64;
-
-    eprintln!("\n  \x1b[36m\x1b[1m═══════════════════════════════════════════════════════\x1b[0m");
-    eprintln!("  \x1b[1m  MEG-APSU v1.2.1 — RESULTS ({} targets)\x1b[0m", pq.len()+nq.len());
-    eprintln!("    Pos mean QVS: {:.1}  |  Neg mean QVS: {:.1}  |  Δ = {:.1}", pm, nm, pm-nm);
-    eprintln!("    \x1b[33mCohen's d:       {:.3}\x1b[0m", d);
-    eprintln!("    \x1b[33mROC AUC:         {:.3}\x1b[0m", auc);
-    eprintln!("    \x1b[33mQVS↔KIE r²:      {:.4}\x1b[0m", qr2);
-    eprintln!("    \x1b[33mPredKIE↔KIE r²:  {:.4}\x1b[0m", kr2);
-    eprintln!("    Threshold: {:.0} (J={:.3})", bt, bj);
-    eprintln!("    Sensitivity: {:.1}% ({}/{})", tp as f64/pq.len().max(1) as f64*100.0, tp, pq.len());
-    eprintln!("    Specificity: {:.1}% ({}/{})", tn as f64/nq.len().max(1) as f64*100.0, tn, nq.len());
-    eprintln!("    Accuracy:    {:.1}%", (tp+tn) as f64/(pq.len()+nq.len()).max(1) as f64*100.0);
-    eprintln!("    Confusion: TP={} FN={} TN={} FP={}", tp, fnc, tn, fp);
-    eprintln!("    Time: {:.1}s", t0.elapsed().as_secs_f64());
-    eprintln!("  \x1b[36m\x1b[1m═══════════════════════════════════════════════════════\x1b[0m\n");
-}
-
 // ═══ CLI ═════════════════════════════════════════════════════════════════
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn cli_scan(path: &str, json: bool) {
     let c = match fs::read_to_string(path) { Ok(c)=>c, Err(e)=>{eprintln!("Error:{}",e);return;} };
     let (title,na,sites,qvs,ms) = full_scan(&c);
     if json {
-        #[derive(Serialize)] struct R{title:String,atoms:usize,sites:Vec<ActiveSite>,qvs:f64,class:String,predicted_kie:f64,enhancement:f64,primary_rxn:String,warning:String,ms:f64}
-        let r=R{title,atoms:na,sites,qvs:qvs.total,class:qvs.class,predicted_kie:qvs.predicted_kie,enhancement:qvs.max_enhancement,primary_rxn:qvs.primary_rxn,warning:qvs.warning,ms};
+        #[derive(Serialize)] struct R{title:String,atoms:usize,sites:Vec<ActiveSite>,score:f64,class:String,predicted_kie:f64,class_prior:f64,primary_rxn:String,note:String,ms:f64}
+        let r=R{title,atoms:na,sites,score:qvs.total,class:qvs.class,predicted_kie:qvs.predicted_kie,class_prior:qvs.max_enhancement,primary_rxn:qvs.primary_rxn,note:qvs.warning,ms};
         println!("{}",serde_json::to_string_pretty(&r).unwrap_or_default());
     } else {
-        println!("\n  MEG-APSU v1.2.1 — {}",title);
+        println!("\n  MEG-APSU v{} — {}",VERSION,title);
         println!("  {} atoms · {} sites",na,sites.len());
         for s in &sites {
             let sub=if s.has_substrate{format!(" [{}]",s.substrate_name)}else{String::new()};
-            println!("    {} — {} (V={:.2}eV){}",s.kind,s.rxn,s.barrier,sub);
+            println!("    {} — {} (class barrier {:.2} eV){}",s.kind,s.rxn,s.barrier,sub);
         }
-        println!("  QVS: {:.1}/100 [{}]  KIE≈{:.1}",qvs.total,qvs.class,qvs.predicted_kie);
-        println!("  Enhancement: {:.0}x via {}",qvs.max_enhancement,qvs.primary_rxn);
+        println!("  APSU score: {:.1}/100 [{}]  KIE class estimate ≈{:.1}",qvs.total,qvs.class,qvs.predicted_kie);
+        println!("  Class prior: {:.3e} ({}; fixed per motif type, not computed from coordinates)",qvs.max_enhancement,qvs.primary_rxn);
         println!("  {}\n  {:.0}ms\n",qvs.warning,ms);
     }
 }
@@ -727,1000 +655,40 @@ fn batch_scan(dir: &str, json: bool) {
     let t0=Instant::now();
     let files:Vec<_>=match fs::read_dir(dir){Ok(e)=>e.filter_map(|e|e.ok()).collect(),Err(e)=>{eprintln!("Error:{}",e);return;}};
     let pdbs:Vec<_>=files.iter().filter(|e|e.path().extension().map(|x|x=="pdb").unwrap_or(false)).collect();
-    if !json{eprintln!("\n  \x1b[36m\x1b[1m═══ MEG-APSU v1.2.1 — BATCH ({} files) ═══\x1b[0m\n",pdbs.len());}
-    #[derive(Serialize)] struct BR{file:String,title:String,qvs:f64,class:String,kie:f64,rxn:String,sites:usize}
-    let mut res:Vec<BR>=Vec::new(); let(mut qc,mut qi,mut cl)=(0,0,0);
+    if !json{eprintln!("\n  \x1b[36m\x1b[1m═══ MEG-APSU v{} — BATCH ({} files) ═══\x1b[0m\n",VERSION,pdbs.len());}
+    #[derive(Serialize)] struct BR{file:String,title:String,score:f64,class:String,kie:f64,rxn:String,sites:usize}
+    let mut res:Vec<BR>=Vec::new(); let(mut nl,mut np,mut nu)=(0,0,0);
     for(i,e)in pdbs.iter().enumerate(){
         let p=e.path(); let f=p.file_name().unwrap_or_default().to_string_lossy().to_string();
         if let Ok(pdb)=fs::read_to_string(&p){
             let(t,_,s,q,ms)=full_scan(&pdb);
-            if !json{let m=if q.total>=40.0{"\x1b[31m●\x1b[0m"}else if q.total>=20.0{"\x1b[33m●\x1b[0m"}else{"\x1b[32m○\x1b[0m"};
-                eprintln!("  [{:4}/{}] {} {:5.1} [{:18}] KIE≈{:5.1} {:.0}ms {}",i+1,pdbs.len(),m,q.total,q.class,q.predicted_kie,ms,f);}
-            match q.class.as_str(){"QUANTUM-CRITICAL"=>{qc+=1},"QUANTUM-INFLUENCED"=>{qi+=1},_=>{cl+=1}}
-            res.push(BR{file:f,title:t,qvs:q.total,class:q.class,kie:q.predicted_kie,rxn:q.primary_rxn,sites:s.len()});
+            if !json{let m=if q.total>=40.0{"\x1b[31m●\x1b[0m"}else if q.total>=SCORE_THRESHOLD{"\x1b[33m●\x1b[0m"}else{"\x1b[32m○\x1b[0m"};
+                eprintln!("  [{:4}/{}] {} {:5.1} [{:20}] KIE≈{:5.1} {:.0}ms {}",i+1,pdbs.len(),m,q.total,q.class,q.predicted_kie,ms,f);}
+            match q.class.as_str(){"TUNNELLING-LIKELY"=>{nl+=1},"TUNNELLING-POSSIBLE"=>{np+=1},_=>{nu+=1}}
+            res.push(BR{file:f,title:t,score:q.total,class:q.class,kie:q.predicted_kie,rxn:q.primary_rxn,sites:s.len()});
         }
     }
     if json{println!("{}",serde_json::to_string_pretty(&res).unwrap_or_default());}
     else{let n=res.len();
         eprintln!("\n  \x1b[36m\x1b[1m═══ SUMMARY ═══\x1b[0m");
-        eprintln!("    Total: {}  \x1b[31m●QC: {} ({:.1}%)\x1b[0m  \x1b[33m●QI: {} ({:.1}%)\x1b[0m  \x1b[32m○CL: {} ({:.1}%)\x1b[0m",
-            n,qc,qc as f64/n.max(1) as f64*100.0,qi,qi as f64/n.max(1) as f64*100.0,cl,cl as f64/n.max(1) as f64*100.0);
+        eprintln!("    Total: {}  likely: {} ({:.1}%)  possible: {} ({:.1}%)  unlikely: {} ({:.1}%)",
+            n,nl,nl as f64/n.max(1) as f64*100.0,np,np as f64/n.max(1) as f64*100.0,nu,nu as f64/n.max(1) as f64*100.0);
         eprintln!("    {:.1}s\n",t0.elapsed().as_secs_f64());
     }
 }
 
-// ═══ PROOF: CLASSICAL MECHANICS IS PHYSICALLY WRONG ═════════════════════
-// Five independent lines of evidence, each sufficient on its own:
-// 1. KIE > 7 (semiclassical limit, Bell 1980)
-// 2. AH/AD outside 0.7-1.2 (Arrhenius prefactor anomaly, Klinman/Scrutton)
-// 3. Temperature-independent KIE (violates Arrhenius, Kohen/Klinman)
-// 4. Swain-Schaad exponent ≠ 3.26 (multi-isotope anomaly, Scrutton)
-// 5. Lindblad QVS > 10 (MEG-APSU open quantum system solver, first principles)
-
-// Extended evidence database — published experimental values
-struct ProofData {
-    name: &'static str,
-    kie: f64,
-    // QVS from MEG-APSU Lindblad solver (0-100). >10 = quantum-critical
-    qvs: f64,
-    // AH/AD: Arrhenius prefactor ratio. Classical limit: 0.7-1.2
-    ah_ad: Option<f64>,
-    ah_ad_ref: &'static str,
-    // Temperature dependence of KIE: true = temperature-INdependent (anomalous)
-    temp_indep: Option<bool>,
-    temp_ref: &'static str,
-    // Swain-Schaad exponent. Classical = 3.26. Anomalous if significantly different.
-    swain_schaad: Option<f64>,
-    ss_ref: &'static str,
-}
-
-fn proof_database() -> Vec<ProofData> { vec![
-    // ─── RADICAL C-H ENZYMES ───
-    ProofData{name:"SLO-1",     kie:81.0, qvs:58.0, ah_ad:Some(18.0),  ah_ad_ref:"Klinman 2006 PNAS",
-        temp_indep:Some(true),  temp_ref:"Knapp 2002 JACS",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"AADH",      kie:55.0, qvs:58.0, ah_ad:Some(13.1),  ah_ad_ref:"Scrutton 2006 JBC",
-        temp_indep:Some(true),  temp_ref:"Masgrau 2006 Science",
-        swain_schaad:Some(50.0), ss_ref:"Scrutton 2006 Science"},
-    ProofData{name:"MMO",       kie:50.0, qvs:75.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"Lippard 1993",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"15-LOX",    kie:40.0, qvs:74.0, ah_ad:Some(7.8), ah_ad_ref:"Glickman 1994 Biochem",
-        temp_indep:Some(true),  temp_ref:"Glickman 1994",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"TauD",      kie:37.0, qvs:75.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"Bollinger 2005",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"12-LOX",    kie:30.0, qvs:74.0, ah_ad:Some(6.5), ah_ad_ref:"Rickert 1999",
-        temp_indep:Some(true),  temp_ref:"Rickert 1999 Biochem",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"COX-2",     kie:27.0, qvs:68.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"5-LOX",     kie:23.0, qvs:58.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(true),  temp_ref:"Nelson 2007",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"GalOx",     kie:22.5, qvs:76.0, ah_ad:Some(1.8), ah_ad_ref:"Whittaker 2006",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"MADH",      kie:16.8, qvs:58.0, ah_ad:Some(13.2), ah_ad_ref:"Scrutton 1999 PNAS",
-        temp_indep:Some(true),  temp_ref:"Basran 1999 Biochem",
-        swain_schaad:Some(14.8), ss_ref:"Scrutton 2001 JBC"},
-    ProofData{name:"MR",        kie:15.4, qvs:51.0, ah_ad:Some(3.1), ah_ad_ref:"Scrutton 2007 PNAS",
-        temp_indep:Some(true),  temp_ref:"Pudney 2006 JACS",
-        swain_schaad:Some(8.5), ss_ref:"Pudney 2006 JACS"},
-    ProofData{name:"ECAO",      kie:12.3, qvs:75.0, ah_ad:Some(6.8), ah_ad_ref:"Grant 1989 Biochem",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"GOx",       kie:12.0, qvs:47.0, ah_ad:Some(1.7), ah_ad_ref:"Roth 2004 PNAS",
-        temp_indep:Some(false), temp_ref:"Roth 2004",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"CYP3A4",    kie:11.5, qvs:62.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"P450cam",   kie:11.0, qvs:58.0, ah_ad:Some(2.4), ah_ad_ref:"Groves 1978",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"P450BM3",   kie:10.0, qvs:62.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"PAM",       kie:10.6, qvs:79.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"ChoOx",     kie:10.0, qvs:47.0, ah_ad:Some(0.26), ah_ad_ref:"Gadda 2003 Biochem",
-        temp_indep:Some(false), temp_ref:"Gadda 2003",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"MAO-B",     kie:9.2,  qvs:47.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"NAO",       kie:9.2,  qvs:47.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"MAO-A",     kie:8.0,  qvs:47.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"CYP2D6",    kie:9.0,  qvs:58.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"CYP2C9",    kie:8.0,  qvs:58.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"P4H",       kie:8.0,  qvs:78.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"PETNR",     kie:7.8,  qvs:53.0, ah_ad:Some(7.8), ah_ad_ref:"Scrutton 2005 JBC",
-        temp_indep:Some(true),  temp_ref:"Scrutton 2005 JBC",
-        swain_schaad:None, ss_ref:""},
-    // ─── HYDRIDE TRANSFER ENZYMES (KIE 3-7) ───
-    ProofData{name:"XO",        kie:7.0,  qvs:75.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"KDM4A",     kie:6.5,  qvs:78.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"PHase",     kie:6.0,  qvs:77.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"Fitzpatrick 2003",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"Aconitase", kie:6.0,  qvs:75.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"IDO",       kie:6.0,  qvs:74.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"DHODH",     kie:5.0,  qvs:47.0, ah_ad:Some(0.12), ah_ad_ref:"Malmquist 2008 Biochem",
-        temp_indep:Some(true),  temp_ref:"Malmquist 2008",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"FLb2",      kie:5.0,  qvs:62.0, ah_ad:Some(5.4), ah_ad_ref:"Scrutton 2003",
-        temp_indep:Some(true),  temp_ref:"Basran 2003 JBC",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"TyrH",      kie:5.0,  qvs:77.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"CPO",       kie:5.0,  qvs:74.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"TMADH",     kie:4.6,  qvs:47.0, ah_ad:Some(7.4), ah_ad_ref:"Scrutton 2002 Biochem",
-        temp_indep:Some(true),  temp_ref:"Basran 2001",
-        swain_schaad:Some(10.2), ss_ref:"Scrutton 2002 JBC"},
-    ProofData{name:"COMT",      kie:4.5,  qvs:44.4, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"TS",        kie:4.0,  qvs:51.0, ah_ad:Some(0.58), ah_ad_ref:"Agrawal 2004 Biochem",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"ACOMD",     kie:4.0,  qvs:57.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"RNR",       kie:4.0,  qvs:81.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"TrpH",      kie:4.0,  qvs:81.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"SDH",       kie:4.0,  qvs:75.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"LADH",      kie:3.8,  qvs:49.0, ah_ad:Some(2.3), ah_ad_ref:"Klinman 1981 Biochem",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:Some(10.2), ss_ref:"Cha 1989 Science"},
-    ProofData{name:"DHFR",      kie:3.5,  qvs:57.0, ah_ad:Some(4.0), ah_ad_ref:"Sikorski 2004 JACS",
-        temp_indep:Some(true),  temp_ref:"Kohen 2004 Nature",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"G6PD",      kie:3.5,  qvs:47.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"PHBH",      kie:3.5,  qvs:51.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"ADH",       kie:3.2,  qvs:47.0, ah_ad:Some(6.1), ah_ad_ref:"Kohen 1999 Nature",
-        temp_indep:Some(true),  temp_ref:"Kohen 1999 Nature",
-        swain_schaad:Some(15.8), ss_ref:"Kohen 1999 Nature"},
-    ProofData{name:"LDH",       kie:3.2,  qvs:49.0, ah_ad:Some(0.13), ah_ad_ref:"Kohen 2011 Biochem",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"GluDH",     kie:3.0,  qvs:53.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"TrxR",      kie:3.0,  qvs:49.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"GR",        kie:3.0,  qvs:47.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"HRP",       kie:3.0,  qvs:76.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"ICDH",      kie:3.0,  qvs:49.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"MDH",       kie:3.0,  qvs:53.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"FDH",       kie:3.0,  qvs:47.0, ah_ad:Some(2.8), ah_ad_ref:"Blanchard 1985",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-    ProofData{name:"DHPR",      kie:3.0,  qvs:55.0, ah_ad:None, ah_ad_ref:"",
-        temp_indep:Some(false), temp_ref:"",
-        swain_schaad:None, ss_ref:""},
-]}
-
-fn proof_classical_wrong() {
-    let t0 = Instant::now();
-
-    let semiclassical_max: f64 = 7.0;
-    let ahad_min: f64 = 0.7;  // Classical lower limit for AH/AD
-    let ahad_max: f64 = 1.2;  // Classical upper limit for AH/AD
-    let ss_classical: f64 = 3.26; // Classical Swain-Schaad exponent
-    let ss_tolerance: f64 = 0.5;  // ±0.5 from classical
-
-    let db = proof_database();
-
-    eprintln!("\n  \x1b[31m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m");
-    eprintln!("  \x1b[1m  PROOF: CLASSICAL MECHANICS IS PHYSICALLY WRONG\x1b[0m");
-    eprintln!("  \x1b[1m  Five Independent Lines of Evidence\x1b[0m");
-    eprintln!("  \x1b[31m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m\n");
-
-    // ═══ EVIDENCE LINE 1: KIE > 7 ═══
-    eprintln!("  \x1b[36m\x1b[1m┌──────────────────────────────────────────────────────────────────┐\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  EVIDENCE 1: KIE Exceeds Semiclassical Limit (Bell 1980)       │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  Classical max H/D KIE = 7.0 at 37°C. Any value above = QM.    │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m└──────────────────────────────────────────────────────────────────┘\x1b[0m\n");
-
-    let mut e1_proven = 0usize;
-    for d in &db {
-        if d.kie > semiclassical_max {
-            let excess = d.kie - semiclassical_max;
-            let factor = d.kie / semiclassical_max;
-            eprintln!("    \x1b[31m✗\x1b[0m {:12} KIE={:5.1} > 7.0  Excess={:5.1}  Arrhenius wrong {:.1}x", d.name, d.kie, excess, factor);
-            e1_proven += 1;
-        }
-    }
-    eprintln!("\n    \x1b[1m→ {}/{} enzymes ({:.0}%) PROVEN by KIE alone\x1b[0m\n", e1_proven, db.len(), e1_proven as f64/db.len() as f64*100.0);
-
-    // ═══ EVIDENCE LINE 2: AH/AD anomaly ═══
-    eprintln!("  \x1b[36m\x1b[1m┌──────────────────────────────────────────────────────────────────┐\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  EVIDENCE 2: Arrhenius Prefactor Anomaly (AH/AD)               │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  Classical limit: 0.7 ≤ AH/AD ≤ 1.2. Outside = tunneling.     │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m└──────────────────────────────────────────────────────────────────┘\x1b[0m\n");
-
-    let mut e2_proven = 0usize;
-    let mut e2_total = 0usize;
-    for d in &db {
-        if let Some(ahad) = d.ah_ad {
-            e2_total += 1;
-            let anomalous = ahad < ahad_min || ahad > ahad_max;
-            if anomalous {
-                let direction = if ahad > ahad_max { "above" } else { "below" };
-                eprintln!("    \x1b[31m✗\x1b[0m {:12} AH/AD={:6.2}  {} classical range [{:.1}-{:.1}]  ({})",
-                    d.name, ahad, direction, ahad_min, ahad_max, d.ah_ad_ref);
-                e2_proven += 1;
-            } else {
-                eprintln!("    \x1b[32m✓\x1b[0m {:12} AH/AD={:6.2}  within classical range  ({})", d.name, ahad, d.ah_ad_ref);
-            }
-        }
-    }
-    eprintln!("\n    \x1b[1m→ {}/{} measured enzymes ({:.0}%) show anomalous AH/AD\x1b[0m\n",
-        e2_proven, e2_total, if e2_total>0{e2_proven as f64/e2_total as f64*100.0}else{0.0});
-
-    // ═══ EVIDENCE LINE 3: Temperature-independent KIE ═══
-    eprintln!("  \x1b[36m\x1b[1m┌──────────────────────────────────────────────────────────────────┐\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  EVIDENCE 3: Temperature-Independent KIE                       │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  Arrhenius: KIE MUST decrease with temperature. If constant =   │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  tunneling dominates and classical barrier is irrelevant.       │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m└──────────────────────────────────────────────────────────────────┘\x1b[0m\n");
-
-    let mut e3_proven = 0usize;
-    let mut e3_total = 0usize;
-    for d in &db {
-        if let Some(ti) = d.temp_indep {
-            e3_total += 1;
-            if ti {
-                eprintln!("    \x1b[31m✗\x1b[0m {:12} KIE temperature-INDEPENDENT → tunneling dominates  ({})", d.name, d.temp_ref);
-                e3_proven += 1;
-            }
-        }
-    }
-    eprintln!("\n    \x1b[1m→ {}/{} measured enzymes ({:.0}%) show temperature-independent KIE\x1b[0m\n",
-        e3_proven, e3_total, if e3_total>0{e3_proven as f64/e3_total as f64*100.0}else{0.0});
-
-    // ═══ EVIDENCE LINE 4: Swain-Schaad Exponent ═══
-    eprintln!("  \x1b[36m\x1b[1m┌──────────────────────────────────────────────────────────────────┐\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  EVIDENCE 4: Swain-Schaad Exponent Breakdown                   │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  Classical: ln(kH/kT)/ln(kD/kT) = 3.26. Deviation = tunneling. │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m└──────────────────────────────────────────────────────────────────┘\x1b[0m\n");
-
-    let mut e4_proven = 0usize;
-    let mut e4_total = 0usize;
-    for d in &db {
-        if let Some(ss) = d.swain_schaad {
-            e4_total += 1;
-            let deviation = (ss - ss_classical).abs();
-            if deviation > ss_tolerance {
-                eprintln!("    \x1b[31m✗\x1b[0m {:12} SS={:6.1}  (classical=3.26, deviation={:.1})  ({})",
-                    d.name, ss, deviation, d.ss_ref);
-                e4_proven += 1;
-            }
-        }
-    }
-    eprintln!("\n    \x1b[1m→ {}/{} measured enzymes ({:.0}%) show anomalous Swain-Schaad\x1b[0m\n",
-        e4_proven, e4_total, if e4_total>0{e4_proven as f64/e4_total as f64*100.0}else{0.0});
-
-    // ═══ EVIDENCE LINE 5: Lindblad Open Quantum System Solver ═══
-    eprintln!("  \x1b[36m\x1b[1m┌──────────────────────────────────────────────────────────────────┐\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  EVIDENCE 5: Lindblad Quantum Solver (MEG-APSU)                │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  RK4 Lindblad master equation on PDB structure. QVS > 10 =     │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  quantum tunneling predicted from FIRST PRINCIPLES.             │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m│  No fitting. No training on KIE values. Pure physics.           │\x1b[0m");
-    eprintln!("  \x1b[36m\x1b[1m└──────────────────────────────────────────────────────────────────┘\x1b[0m\n");
-
-    let qvs_threshold = 10.0;
-    let mut e5_proven = 0usize;
-    for d in &db {
-        if d.qvs > qvs_threshold {
-            eprintln!("    \x1b[31m✗\x1b[0m {:12} QVS={:5.1} > {:.0}  → QUANTUM-CRITICAL (Lindblad solver)", d.name, d.qvs, qvs_threshold);
-            e5_proven += 1;
-        } else {
-            eprintln!("    \x1b[33m△\x1b[0m {:12} QVS={:5.1} ≤ {:.0}  → MARGINAL (apo PDB, cofactor missing?)", d.name, d.qvs, qvs_threshold);
-        }
-    }
-    eprintln!("\n    \x1b[1m→ {}/{} enzymes ({:.0}%) classified QUANTUM-CRITICAL by Lindblad solver\x1b[0m\n",
-        e5_proven, db.len(), e5_proven as f64/db.len() as f64*100.0);
-
-    // ═══ COMBINED VERDICT ═══
-    eprintln!("  \x1b[31m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m");
-    eprintln!("  \x1b[1m  COMBINED VERDICT — FIVE INDEPENDENT LINES OF EVIDENCE\x1b[0m");
-    eprintln!("  \x1b[31m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m\n");
-
-    eprintln!("    \x1b[1m{:12} {:>6} {:>7} {:>5} {:>6} {:>5} {:>5}  {}\x1b[0m",
-        "Enzyme", "KIE", "KIE>7?", "AH/AD", "Temp?", "SS?", "QVS?", "Verdict");
-    eprintln!("    {:12} {:>6} {:>7} {:>5} {:>6} {:>5} {:>5}  {}",
-        "────────────", "──────", "───────", "─────", "──────", "─────", "─────", "──────────────────────");
-
-    let mut total_proven = 0usize;
-    let mut total_multi = 0usize;
-    let mut per_enzyme_hits: Vec<(&str, usize, usize)> = Vec::new(); // name, hits, tests
-
-    for d in &db {
-        let mut hits = 0usize;
-        let mut tests = 1usize; // KIE always tested
-
-        // Test 1: KIE > 7
-        let kie_fail = d.kie > semiclassical_max;
-        if kie_fail { hits += 1; }
-        let kie_sym = if kie_fail { "\x1b[31m✗\x1b[0m" } else { "\x1b[32m·\x1b[0m" };
-
-        // Test 2: AH/AD
-        let ahad_sym = if let Some(ahad) = d.ah_ad {
-            tests += 1;
-            let fail = ahad < ahad_min || ahad > ahad_max;
-            if fail { hits += 1; "\x1b[31m✗\x1b[0m" } else { "\x1b[32m·\x1b[0m" }
-        } else { "\x1b[90m—\x1b[0m" };
-
-        // Test 3: Temp independence
-        let temp_sym = if let Some(ti) = d.temp_indep {
-            tests += 1;
-            if ti { hits += 1; "\x1b[31m✗\x1b[0m" } else { "\x1b[32m·\x1b[0m" }
-        } else { "\x1b[90m—\x1b[0m" };
-
-        // Test 4: Swain-Schaad
-        let ss_sym = if let Some(ss) = d.swain_schaad {
-            tests += 1;
-            let fail = (ss - ss_classical).abs() > ss_tolerance;
-            if fail { hits += 1; "\x1b[31m✗\x1b[0m" } else { "\x1b[32m·\x1b[0m" }
-        } else { "\x1b[90m—\x1b[0m" };
-
-        // Test 5: Lindblad QVS
-        tests += 1;
-        let qvs_fail = d.qvs > qvs_threshold;
-        if qvs_fail { hits += 1; }
-        let qvs_sym = if qvs_fail { "\x1b[31m✗\x1b[0m" } else { "\x1b[33m△\x1b[0m" };
-
-        let (verdict, color) = if hits >= 4 {
-            total_proven += 1; total_multi += 1;
-            ("PROVEN (multi-evidence)", "\x1b[31m\x1b[1m")
-        } else if hits >= 3 {
-            total_proven += 1; total_multi += 1;
-            ("PROVEN (3+ evidence)", "\x1b[31m\x1b[1m")
-        } else if hits >= 2 {
-            total_proven += 1; total_multi += 1;
-            ("PROVEN (2+ evidence)", "\x1b[31m")
-        } else if hits >= 1 {
-            total_proven += 1;
-            ("PROVEN (1 evidence)", "\x1b[33m")
-        } else {
-            ("not yet proven", "\x1b[90m")
-        };
-
-        eprintln!("    {}{:12} {:>6.1}    {}      {}     {}    {}    {}  {}\x1b[0m",
-            color, d.name, d.kie, kie_sym, ahad_sym, temp_sym, ss_sym, qvs_sym, verdict);
-
-        per_enzyme_hits.push((d.name, hits, tests));
-    }
-
-    let n = db.len();
-    let pct = total_proven as f64 / n as f64 * 100.0;
-
-    eprintln!("\n  \x1b[31m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m");
-    eprintln!("    \x1b[1mFINAL RESULTS: {} enzymes analyzed\x1b[0m\n", n);
-    eprintln!("    \x1b[31m● PROVEN (≥1 evidence line):   {:3} ({:.0}%)\x1b[0m", total_proven, pct);
-    eprintln!("    \x1b[31m● MULTI-EVIDENCE (≥2 lines):   {:3}\x1b[0m", total_multi);
-    eprintln!("    \x1b[90m○ Not yet proven:              {:3}\x1b[0m  (insufficient data, not classical)\n", n - total_proven);
-
-    eprintln!("    Evidence coverage:");
-    eprintln!("      Line 1 (KIE > 7):              {:3}/{} proven", e1_proven, n);
-    eprintln!("      Line 2 (AH/AD anomalous):      {:3}/{} proven (of {} measured)", e2_proven, n, e2_total);
-    eprintln!("      Line 3 (Temp-independent KIE):  {:3}/{} proven (of {} measured)", e3_proven, n, e3_total);
-    eprintln!("      Line 4 (Swain-Schaad anomaly):  {:3}/{} proven (of {} measured)", e4_proven, n, e4_total);
-    eprintln!("      Line 5 (Lindblad QVS solver):   {:3}/{} proven (computational)\n", e5_proven, n);
-
-    // ═══ PREDICTIONS FOR UNMEASURED ENZYMES ═══
-    // For the "not yet proven" enzymes, predict what lab measurements WILL find
-    // Based on Bell tunneling model and empirical correlations from proven enzymes
-    eprintln!("\n  \x1b[35m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m");
-    eprintln!("  \x1b[1m  PREDICTIONS — What labs WILL find when they measure\x1b[0m");
-    eprintln!("  \x1b[35m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m\n");
-
-    eprintln!("    These enzymes lack AH/AD, temperature, or Swain-Schaad data.");
-    eprintln!("    MEG-APSU predicts what experimentalists will find.\n");
-
-    eprintln!("    \x1b[1m{:12} {:>6} {:>12} {:>10} {:>12}  {}\x1b[0m",
-        "Enzyme", "KIE", "Pred AH/AD", "Pred Temp", "Pred SS", "Basis");
-    eprintln!("    {:12} {:>6} {:>12} {:>10} {:>12}  {}",
-        "────────────", "──────", "────────────", "──────────", "────────────", "──────────────────────");
-
-    let mut pred_count = 0usize;
-    let mut pred_proven_upgrade = 0usize;
-
-    for d in &db {
-        // Only predict for enzymes that are "not yet proven" or have missing data
-        let has_ahad = d.ah_ad.is_some();
-        let has_temp = d.temp_indep.map_or(false, |t| t); // only count if true
-        let has_ss = d.swain_schaad.is_some();
-
-        // Count how many evidence lines this enzyme already fails
-        let mut current_hits = 0;
-        if d.kie > semiclassical_max { current_hits += 1; }
-        if let Some(ahad) = d.ah_ad { if ahad < ahad_min || ahad > ahad_max { current_hits += 1; } }
-        if let Some(true) = d.temp_indep { current_hits += 1; }
-        if let Some(ss) = d.swain_schaad { if (ss - ss_classical).abs() > ss_tolerance { current_hits += 1; } }
-
-        // Only predict for enzymes missing at least one measurement
-        let missing_any = !has_ahad || d.temp_indep.is_none() || !has_ss;
-        if !missing_any { continue; }
-
-        pred_count += 1;
-
-        // ── Predict AH/AD from KIE using Bell model correlation ──
-        // Empirical from measured data:
-        //   KIE > 20 → AH/AD typically 5-20 (massive tunneling inflates prefactor)
-        //   KIE 7-20 → AH/AD typically 1.5-8
-        //   KIE 3-7  → AH/AD typically 0.1-0.6 OR 2-6 (can go either way)
-        // The key: classical range is 0.7-1.2. Almost never lands there with tunneling.
-        let pred_ahad = if !has_ahad {
-            if d.kie > 20.0 { Some("5.0 - 20.0") }
-            else if d.kie > 10.0 { Some("1.5 - 8.0") }
-            else if d.kie > 7.0 { Some("1.3 - 5.0") }
-            else if d.kie > 4.0 { Some("0.1-0.6|2-6") }
-            else { Some("0.1-0.5|2-4") }
-        } else { None };
-
-        // ── Predict temperature independence from KIE ──
-        // Empirical: enzymes with KIE > 10 AND radical mechanism → almost always temp-independent
-        // Hydride transfer enzymes with KIE 3-7 → depends on donor-acceptor distance coupling
-        // Conservative: predict temp-independent if KIE > 15 or if AH/AD >> 1.2
-        let pred_temp = if d.temp_indep.is_none() {
-            if d.kie > 15.0 { Some("INDEPENDENT") }
-            else if d.kie > 7.0 { Some("likely indep") }
-            else if d.kie > 4.0 { Some("possible") }
-            else { Some("uncertain") }
-        } else { None };
-
-        // ── Predict Swain-Schaad exponent from KIE ──
-        // Empirical correlation from measured data:
-        //   AADH KIE=55 → SS=50, MADH KIE=16.8 → SS=14.8, ADH KIE=3.2 → SS=15.8
-        //   Rough: SS ≈ 3.26 + (KIE - 3) * scaling_factor
-        //   More accurate: SS scales with tunneling fraction, ~5-15 for moderate, ~20-50 for heavy
-        let pred_ss = if !has_ss {
-            if d.kie > 30.0 { Some("20 - 50+") }
-            else if d.kie > 10.0 { Some("8 - 20") }
-            else if d.kie > 5.0 { Some("5 - 15") }
-            else { Some("4 - 10") }
-        } else { None };
-
-        let ahad_str = pred_ahad.unwrap_or("(measured)");
-        let temp_str = pred_temp.unwrap_or("(measured)");
-        let ss_str = pred_ss.unwrap_or("(measured)");
-
-        // Would this prediction upgrade the enzyme to "proven"?
-        let would_upgrade = current_hits == 0 && d.kie >= 3.0;
-        if would_upgrade { pred_proven_upgrade += 1; }
-
-        let marker = if would_upgrade { "\x1b[35m→ WILL PROVE\x1b[0m" }
-            else if current_hits > 0 { "\x1b[33m→ adds evidence\x1b[0m" }
-            else { "" };
-
-        eprintln!("    \x1b[35m{:12}\x1b[0m {:>6.1} {:>12} {:>10} {:>12}  {}",
-            d.name, d.kie, ahad_str, temp_str, ss_str, marker);
-    }
-
-    let projected_total = (total_proven + pred_proven_upgrade).min(n);
-    let projected_pct = projected_total as f64 / n as f64 * 100.0;
-
-    eprintln!("\n    \x1b[1m{} enzymes with missing measurements predicted.\x1b[0m", pred_count);
-    eprintln!("    \x1b[35m\x1b[1m{} will be UPGRADED to PROVEN when measured.\x1b[0m\n", pred_proven_upgrade);
-
-    eprintln!("    \x1b[1mProjected results after measurement:\x1b[0m");
-    eprintln!("    Currently proven:   {:3}/{} ({:.0}%)", total_proven, n, pct);
-    eprintln!("    After measurement:  \x1b[35m\x1b[1m{:3}/{} ({:.0}%)\x1b[0m ← PROJECTED\n", projected_total, n, projected_pct);
-
-    eprintln!("    \x1b[35m\x1b[1m╔══════════════════════════════════════════════════════════════════════╗\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║  Based on 100% anomaly rate in measured AH/AD (21/21) and         ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║  100% anomaly rate in measured Swain-Schaad (6/6):                ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║  MEG-APSU predicts that {}/{} enzymes ({:.0}%) will be proven    ║\x1b[0m",
-        projected_total, n, projected_pct);
-    eprintln!("    \x1b[35m\x1b[1m║  to use quantum tunneling once measurements are complete.         ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║  EVERY prediction is testable. EVERY prediction is falsifiable.   ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║  This is how science works.                                       ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[35m\x1b[1m╚══════════════════════════════════════════════════════════════════════╝\x1b[0m\n");
-
-    // The killing conclusion
-    eprintln!("    \x1b[31m\x1b[1m╔══════════════════════════════════════════════════════════════════════╗\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║  CONCLUSION                                                        ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║  Using FIVE independent lines of evidence:                        ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║    1. KIE exceeding semiclassical limit (Bell 1980)                ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║    2. Anomalous Arrhenius prefactor ratios (AH/AD)                 ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║    3. Temperature-independent isotope effects                      ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║    4. Swain-Schaad exponent breakdown                              ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║    5. Lindblad open quantum system solver (MEG-APSU)               ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║  {} of {} enzymes ({:.0}%) are EXPERIMENTALLY PROVEN to use       ║\x1b[0m",
-        total_proven, n, pct);
-    eprintln!("    \x1b[31m\x1b[1m║  quantum tunneling. Classical mechanics cannot explain them.       ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║  PROJECTED: {}/{} ({:.0}%) after pending measurements.            ║\x1b[0m",
-        projected_total, n, projected_pct);
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    if total_multi > 0 {
-    eprintln!("    \x1b[31m\x1b[1m║  {} enzymes fail MULTIPLE independent tests — making the case   ║\x1b[0m", total_multi);
-    eprintln!("    \x1b[31m\x1b[1m║  for tunneling irrefutable for these targets.                      ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    }
-    eprintln!("    \x1b[31m\x1b[1m║  The pharmaceutical industry models these enzymes classically.     ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║  This is not a minor error. It is a fundamental physical mistake.  ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║  The Arrhenius equation is wrong. The data prove it.               ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║  This is not a debate. This is physics.                            ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m║                                                                    ║\x1b[0m");
-    eprintln!("    \x1b[31m\x1b[1m╚══════════════════════════════════════════════════════════════════════╝\x1b[0m");
-
-    eprintln!("\n    Time: {:.1}s", t0.elapsed().as_secs_f64());
-    eprintln!("    sectio-aurea-q · MEGALODON Research · 2026");
-    eprintln!("  \x1b[31m\x1b[1m══════════════════════════════════════════════════════════════════════════════════\x1b[0m\n");
-}
-
 fn main() {
-    eprintln!("\x1b[36m  MEG-APSU v1.2.1 — Quantum Drug Target Analyzer");
+    eprintln!("\x1b[36m  MEG-APSU v{} — structure-based triage of hydrogen-tunnelling enzymes", VERSION);
     eprintln!("  sectio-aurea-q · MEGALODON Research\x1b[0m\n");
     let args:Vec<String>=env::args().collect();
     let json=args.iter().any(|a|a=="--json");
     match args.get(1).map(|s|s.as_str()).unwrap_or("help") {
-        "validate"=>validate(),
-        "blind"=>blind_test(),
-        "drugbank"=>drugbank_scan(json),
-        "proof"=>proof_classical_wrong(),
         "bench"=>bench::bench(args.get(2).map(|s|s.as_str()).unwrap_or("")),
         "scan"=>if let Some(f)=args.get(2){cli_scan(f,json);}else{eprintln!("  meg-apsu scan <pdb> [--json]");},
         "batch"=>if let Some(d)=args.get(2){batch_scan(d,json);}else{eprintln!("  meg-apsu batch <dir> [--json]");},
-        _=>{eprintln!("  meg-apsu validate              Training set ({} enzymes)",pos().len()+neg().len());
-            eprintln!("  meg-apsu blind                 Held-out blind test (30 enzymes)");
-            eprintln!("  meg-apsu drugbank [--json]     FDA drug target scan (150+ enzymes)");
-            eprintln!("  meg-apsu proof                 Proof that classical is wrong");
-            eprintln!("  meg-apsu scan <pdb> [--json]   Single file");
-            eprintln!("  meg-apsu batch <dir> [--json]  Directory scan");}
-    }
-}
-
-// ═══ FDA DRUG TARGET DATABASE ═══════════════════════════════════════════
-// Curated list of human enzyme drug targets with FDA-approved inhibitors
-// Sources: DrugBank 6.0, IUPHAR/BPS, Roskoski (2025), FDA labels
-struct DrugTarget { name: &'static str, pdb: &'static str, category: &'static str, drugs: &'static str }
-fn fda_targets() -> Vec<DrugTarget> { vec![
-    // ─── CYTOCHROME P450s (Heme-thiolate, radical C-H) ───
-    DrugTarget{name:"CYP1A2",pdb:"2HI4",category:"P450",drugs:"fluvoxamine,ciprofloxacin"},
-    DrugTarget{name:"CYP2A6",pdb:"1Z10",category:"P450",drugs:"methoxsalen"},
-    DrugTarget{name:"CYP2B6",pdb:"3IBD",category:"P450",drugs:"ticlopidine"},
-    DrugTarget{name:"CYP2C8",pdb:"1PQ2",category:"P450",drugs:"montelukast"},
-    DrugTarget{name:"CYP2C19",pdb:"4GQS",category:"P450",drugs:"omeprazole,esomeprazole"},
-    DrugTarget{name:"CYP2E1",pdb:"3E6I",category:"P450",drugs:"disulfiram,isoniazid"},
-    DrugTarget{name:"CYP3A4",pdb:"1TQN",category:"P450",drugs:"ketoconazole,ritonavir,itraconazole"},
-    DrugTarget{name:"CYP11A1",pdb:"3N9Y",category:"P450",drugs:"aminoglutethimide"},
-    DrugTarget{name:"CYP11B1",pdb:"6M7X",category:"P450",drugs:"metyrapone,osilodrostat"},
-    DrugTarget{name:"CYP11B2",pdb:"4DVQ",category:"P450",drugs:"osilodrostat"},
-    DrugTarget{name:"CYP17A1",pdb:"3RUK",category:"P450",drugs:"abiraterone"},
-    DrugTarget{name:"CYP19A1",pdb:"3EQM",category:"P450",drugs:"letrozole,anastrozole,exemestane"},
-    DrugTarget{name:"CYP51A1",pdb:"3JUV",category:"P450",drugs:"fluconazole,voriconazole,posaconazole"},
-    // ─── MONOAMINE OXIDASES (FAD, radical/hydride) ───
-    DrugTarget{name:"MAO-A",pdb:"2Z5X",category:"MAO",drugs:"moclobemide,phenelzine,tranylcypromine"},
-    DrugTarget{name:"MAO-B",pdb:"1GOS",category:"MAO",drugs:"selegiline,rasagiline,safinamide"},
-    // ─── CYCLOOXYGENASES (Heme, radical) ───
-    DrugTarget{name:"COX-1",pdb:"1EQG",category:"COX",drugs:"aspirin,ibuprofen,naproxen"},
-    DrugTarget{name:"COX-2",pdb:"3HS5",category:"COX",drugs:"celecoxib,rofecoxib,etoricoxib"},
-    // ─── LIPOXYGENASES (Non-heme iron, radical) ───
-    DrugTarget{name:"5-LOX",pdb:"3O8Y",category:"LOX",drugs:"zileuton"},
-    DrugTarget{name:"15-LOX-1",pdb:"1LOX",category:"LOX",drugs:"(experimental)"},
-    // ─── XANTHINE OXIDASE (Mo/Fe-S/FAD) ───
-    DrugTarget{name:"XO",pdb:"1FIQ",category:"XO",drugs:"allopurinol,febuxostat"},
-    // ─── DIHYDROFOLATE REDUCTASE (NADPH, hydride) ───
-    DrugTarget{name:"hDHFR",pdb:"1DRF",category:"DHFR",drugs:"methotrexate,pemetrexed,trimethoprim"},
-    // ─── HMG-CoA REDUCTASE (NADPH, hydride) ───
-    DrugTarget{name:"HMGCR",pdb:"1HWK",category:"Statin",drugs:"atorvastatin,simvastatin,rosuvastatin"},
-    // ─── PHOSPHODIESTERASES (Zn/Mg, hydrolysis) ───
-    DrugTarget{name:"PDE3A",pdb:"1SO2",category:"PDE",drugs:"milrinone,cilostazol"},
-    DrugTarget{name:"PDE4B",pdb:"1F0J",category:"PDE",drugs:"roflumilast,apremilast,crisaborole"},
-    DrugTarget{name:"PDE4D",pdb:"1OYN",category:"PDE",drugs:"roflumilast"},
-    DrugTarget{name:"PDE5A",pdb:"1UDT",category:"PDE",drugs:"sildenafil,tadalafil,vardenafil"},
-    DrugTarget{name:"PDE10A",pdb:"2OUP",category:"PDE",drugs:"(experimental)"},
-    // ─── ACETYLCHOLINESTERASE ───
-    DrugTarget{name:"AChE",pdb:"4EY7",category:"AChE",drugs:"donepezil,rivastigmine,galantamine"},
-    // ─── ANGIOTENSIN-CONVERTING ENZYME (Zn) ───
-    DrugTarget{name:"ACE",pdb:"1O86",category:"ACE",drugs:"enalapril,lisinopril,ramipril,captopril"},
-    DrugTarget{name:"ACE2",pdb:"1R42",category:"ACE",drugs:"(COVID target)"},
-    // ─── MATRIX METALLOPROTEINASES (Zn) ───
-    DrugTarget{name:"MMP-1",pdb:"1CGE",category:"MMP",drugs:"doxycycline"},
-    DrugTarget{name:"MMP-2",pdb:"1CK7",category:"MMP",drugs:"(experimental)"},
-    DrugTarget{name:"MMP-9",pdb:"1GKC",category:"MMP",drugs:"doxycycline"},
-    DrugTarget{name:"MMP-13",pdb:"1YOU",category:"MMP",drugs:"(experimental)"},
-    // ─── CARBONIC ANHYDRASES (Zn) ───
-    DrugTarget{name:"CA-I",pdb:"1HCB",category:"CA",drugs:"acetazolamide"},
-    DrugTarget{name:"CA-II",pdb:"1CA2",category:"CA",drugs:"acetazolamide,dorzolamide,brinzolamide"},
-    DrugTarget{name:"CA-IX",pdb:"3IAI",category:"CA",drugs:"(experimental, cancer)"},
-    DrugTarget{name:"CA-XII",pdb:"1JCZ",category:"CA",drugs:"(experimental)"},
-    // ─── PROTEIN KINASES (ATP, Mg/Mn) ───
-    DrugTarget{name:"ABL1",pdb:"1IEP",category:"Kinase",drugs:"imatinib,dasatinib,nilotinib,bosutinib"},
-    DrugTarget{name:"EGFR",pdb:"1M17",category:"Kinase",drugs:"erlotinib,gefitinib,osimertinib,afatinib"},
-    DrugTarget{name:"BRAF",pdb:"1UWH",category:"Kinase",drugs:"vemurafenib,dabrafenib,encorafenib"},
-    DrugTarget{name:"ALK",pdb:"2XP2",category:"Kinase",drugs:"crizotinib,ceritinib,alectinib"},
-    DrugTarget{name:"JAK1",pdb:"3EYG",category:"Kinase",drugs:"tofacitinib,baricitinib,upadacitinib"},
-    DrugTarget{name:"JAK2",pdb:"3FUP",category:"Kinase",drugs:"ruxolitinib,fedratinib"},
-    DrugTarget{name:"BTK",pdb:"3GEN",category:"Kinase",drugs:"ibrutinib,acalabrutinib,zanubrutinib"},
-    DrugTarget{name:"MEK1",pdb:"3EQI",category:"Kinase",drugs:"trametinib,cobimetinib,binimetinib"},
-    DrugTarget{name:"CDK4",pdb:"2W96",category:"Kinase",drugs:"palbociclib,ribociclib,abemaciclib"},
-    DrugTarget{name:"CDK6",pdb:"1BI7",category:"Kinase",drugs:"palbociclib,ribociclib"},
-    DrugTarget{name:"VEGFR2",pdb:"1YWN",category:"Kinase",drugs:"sunitinib,sorafenib,axitinib,lenvatinib"},
-    DrugTarget{name:"FGFR1",pdb:"3C4F",category:"Kinase",drugs:"erdafitinib,pemigatinib"},
-    DrugTarget{name:"MET",pdb:"3LQ8",category:"Kinase",drugs:"capmatinib,tepotinib"},
-    DrugTarget{name:"RET",pdb:"2IVT",category:"Kinase",drugs:"selpercatinib,pralsetinib"},
-    DrugTarget{name:"PI3Kα",pdb:"4JPS",category:"Kinase",drugs:"alpelisib"},
-    DrugTarget{name:"PI3Kδ",pdb:"4XE0",category:"Kinase",drugs:"idelalisib,duvelisib"},
-    DrugTarget{name:"mTOR",pdb:"4DRH",category:"Kinase",drugs:"everolimus,temsirolimus"},
-    DrugTarget{name:"AKT1",pdb:"3O96",category:"Kinase",drugs:"capivasertib"},
-    DrugTarget{name:"SRC",pdb:"2SRC",category:"Kinase",drugs:"dasatinib,bosutinib"},
-    DrugTarget{name:"KIT",pdb:"1T46",category:"Kinase",drugs:"imatinib,sunitinib,regorafenib"},
-    DrugTarget{name:"FLT3",pdb:"4XUF",category:"Kinase",drugs:"midostaurin,gilteritinib,quizartinib"},
-    DrugTarget{name:"PDGFRA",pdb:"5K5X",category:"Kinase",drugs:"imatinib,avapritinib"},
-    DrugTarget{name:"ERBB2",pdb:"3PP0",category:"Kinase",drugs:"lapatinib,neratinib,tucatinib"},
-    DrugTarget{name:"TRK-A",pdb:"4AOJ",category:"Kinase",drugs:"larotrectinib,entrectinib"},
-    DrugTarget{name:"ROS1",pdb:"3ZBF",category:"Kinase",drugs:"crizotinib,entrectinib"},
-    DrugTarget{name:"RAF1",pdb:"3OMV",category:"Kinase",drugs:"sorafenib"},
-    DrugTarget{name:"AURKA",pdb:"2DWB",category:"Kinase",drugs:"(experimental)"},
-    DrugTarget{name:"PLK1",pdb:"2RKU",category:"Kinase",drugs:"(experimental)"},
-    DrugTarget{name:"WEE1",pdb:"5V5Y",category:"Kinase",drugs:"adavosertib"},
-    // ─── PROTEASES ───
-    DrugTarget{name:"HIV-PR",pdb:"1HPV",category:"Protease",drugs:"ritonavir,darunavir,atazanavir"},
-    DrugTarget{name:"HCV-NS3",pdb:"1A1R",category:"Protease",drugs:"boceprevir,telaprevir,simeprevir"},
-    DrugTarget{name:"Thrombin",pdb:"1PPB",category:"Protease",drugs:"dabigatran,argatroban"},
-    DrugTarget{name:"FactorXa",pdb:"1FAX",category:"Protease",drugs:"rivaroxaban,apixaban,edoxaban"},
-    DrugTarget{name:"DPP4",pdb:"1X70",category:"Protease",drugs:"sitagliptin,saxagliptin,linagliptin"},
-    DrugTarget{name:"Neprilysin",pdb:"1DMT",category:"Protease",drugs:"sacubitril"},
-    DrugTarget{name:"Renin",pdb:"2V0Z",category:"Protease",drugs:"aliskiren"},
-    DrugTarget{name:"Proteasome",pdb:"5LF3",category:"Protease",drugs:"bortezomib,carfilzomib,ixazomib"},
-    DrugTarget{name:"Cathepsin-K",pdb:"1ATK",category:"Protease",drugs:"(odanacatib, discontinued)"},
-    // ─── TOPOISOMERASES ───
-    DrugTarget{name:"TOP1",pdb:"1T8I",category:"Topo",drugs:"irinotecan,topotecan"},
-    DrugTarget{name:"TOP2A",pdb:"5GWK",category:"Topo",drugs:"doxorubicin,etoposide"},
-    // ─── THYMIDYLATE SYNTHASE ───
-    DrugTarget{name:"hTS",pdb:"2TSC",category:"TS",drugs:"5-fluorouracil,capecitabine,pemetrexed"},
-    // ─── DIHYDROOROTATE DEHYDROGENASE ───
-    DrugTarget{name:"DHODH",pdb:"1D3G",category:"DHODH",drugs:"leflunomide,teriflunomide"},
-    // ─── INOSINE MONOPHOSPHATE DH ───
-    DrugTarget{name:"IMPDH2",pdb:"1NF7",category:"IMPDH",drugs:"mycophenolate"},
-    // ─── POLY(ADP-RIBOSE) POLYMERASE ───
-    DrugTarget{name:"PARP1",pdb:"4DQY",category:"PARP",drugs:"olaparib,rucaparib,niraparib,talazoparib"},
-    // ─── HISTONE DEACETYLASES (Zn) ───
-    DrugTarget{name:"HDAC1",pdb:"4BKX",category:"HDAC",drugs:"vorinostat,romidepsin,panobinostat"},
-    DrugTarget{name:"HDAC6",pdb:"5EDU",category:"HDAC",drugs:"ricolinostat (experimental)"},
-    // ─── IDH MUTANTS (NADPH) ───
-    DrugTarget{name:"IDH1-R132H",pdb:"3MAP",category:"IDH",drugs:"ivosidenib"},
-    DrugTarget{name:"IDH2-R140Q",pdb:"5I96",category:"IDH",drugs:"enasidenib"},
-    // ─── AROMATASE ── (= CYP19A1, already listed)
-    // ─── NITRIC OXIDE SYNTHASES (Heme, BH4) ───
-    DrugTarget{name:"nNOS",pdb:"4D1N",category:"NOS",drugs:"(experimental)"},
-    DrugTarget{name:"iNOS",pdb:"1NSI",category:"NOS",drugs:"(experimental, anti-inflammatory)"},
-    DrugTarget{name:"eNOS",pdb:"4D1O",category:"NOS",drugs:"(NO donors indirect)"},
-    // ─── ALDOSE REDUCTASE (NADPH) ───
-    DrugTarget{name:"AKR1B1",pdb:"1ADS",category:"AKR",drugs:"epalrestat (Japan)"},
-    // ─── LACTATE DEHYDROGENASE ───
-    DrugTarget{name:"LDHA",pdb:"1I10",category:"LDH",drugs:"(experimental, cancer)"},
-    // ─── FATTY ACID SYNTHASE ───
-    DrugTarget{name:"FASN",pdb:"2PX6",category:"FAS",drugs:"(TVB-2640 experimental)"},
-    // ─── SQUALENE SYNTHASE ───
-    DrugTarget{name:"SQS",pdb:"1EZF",category:"SQS",drugs:"(experimental, cholesterol)"},
-    // ─── TYROSINE HYDROXYLASE (Fe, BH4) ───
-    DrugTarget{name:"TH",pdb:"2TOH",category:"TH",drugs:"metyrosine"},
-    // ─── DOPAMINE-β-HYDROXYLASE (Cu) ───
-    DrugTarget{name:"DBH",pdb:"4ZEL",category:"DBH",drugs:"disulfiram (indirect)"},
-    // ─── CATECHOL-O-METHYLTRANSFERASE (SAM, Mg) ───
-    DrugTarget{name:"COMT",pdb:"3BWM",category:"COMT",drugs:"entacapone,tolcapone,opicapone"},
-    // ─── ADENOSINE DEAMINASE ───
-    DrugTarget{name:"ADA",pdb:"1ADD",category:"ADA",drugs:"pentostatin"},
-    // ─── PURINE NUCLEOSIDE PHOSPHORYLASE ───
-    DrugTarget{name:"PNP",pdb:"1M73",category:"PNP",drugs:"forodesine (Japan)"},
-    // ─── GLUCOSE-6-PHOSPHATE DEHYDROGENASE ───
-    DrugTarget{name:"G6PD",pdb:"1QKI",category:"G6PD",drugs:"(pharmacogenomics target)"},
-    // ─── LANOSTEROL DEMETHYLASE (CYP51, fungal) ───
-    DrugTarget{name:"CYP51-fungal",pdb:"5TZ1",category:"CYP51",drugs:"fluconazole,itraconazole"},
-    // ─── BACTERIAL TARGETS ───
-    DrugTarget{name:"InhA-Mtb",pdb:"2B35",category:"Bacterial",drugs:"isoniazid"},
-    DrugTarget{name:"DHPS",pdb:"1AJ0",category:"Bacterial",drugs:"sulfamethoxazole,sulfadiazine"},
-    DrugTarget{name:"MurA",pdb:"1UAE",category:"Bacterial",drugs:"fosfomycin"},
-    DrugTarget{name:"GyrB",pdb:"1KZN",category:"Bacterial",drugs:"novobiocin"},
-    // ─── VIRAL TARGETS ───
-    DrugTarget{name:"HIV-RT",pdb:"1RTH",category:"Viral",drugs:"zidovudine,efavirenz,tenofovir"},
-    DrugTarget{name:"HIV-IN",pdb:"3OYA",category:"Viral",drugs:"raltegravir,dolutegravir"},
-    DrugTarget{name:"NS5B-HCV",pdb:"1NB7",category:"Viral",drugs:"sofosbuvir,dasabuvir"},
-    DrugTarget{name:"NS5A-HCV",pdb:"3FQQ",category:"Viral",drugs:"ledipasvir,daclatasvir"},
-    DrugTarget{name:"Neuraminidase",pdb:"2HU4",category:"Viral",drugs:"oseltamivir,zanamivir"},
-    DrugTarget{name:"Mpro-SARS2",pdb:"6LU7",category:"Viral",drugs:"nirmatrelvir (paxlovid)"},
-    DrugTarget{name:"RdRp-SARS2",pdb:"7BV2",category:"Viral",drugs:"remdesivir,molnupiravir"},
-    // ─── DEHYDROGENASES / OXIDOREDUCTASES ───
-    DrugTarget{name:"11βHSD1",pdb:"2BEL",category:"HSD",drugs:"(experimental, diabetes)"},
-    DrugTarget{name:"17βHSD1",pdb:"1FDT",category:"HSD",drugs:"(experimental, cancer)"},
-    DrugTarget{name:"SDH-complex",pdb:"1NEK",category:"SDH",drugs:"(mitochondrial)"},
-    DrugTarget{name:"DHODH-Pf",pdb:"1TV5",category:"Bacterial",drugs:"DSM265 (antimalarial)"},
-]}
-
-fn drugbank_scan(json: bool) {
-    let t0 = Instant::now();
-    let cache = format!("{}/.meg-apsu-pdb-cache", env::var("HOME").unwrap_or("/tmp".into()));
-    let _ = fs::create_dir_all(&cache);
-    let targets = fda_targets();
-    eprintln!("\n  \x1b[31m\x1b[1m═══════════════════════════════════════════════════════════════\x1b[0m");
-    eprintln!("  \x1b[1m  MEG-APSU v1.2.1 — FDA DRUG TARGET QUANTUM VULNERABILITY SCAN\x1b[0m");
-    eprintln!("  \x1b[2m  {} FDA-approved drug target enzymes · RCSB PDB structures\x1b[0m", targets.len());
-    eprintln!("  \x1b[2m  \"How many drug targets use quantum mechanics?\"\x1b[0m");
-    eprintln!("  \x1b[31m\x1b[1m═══════════════════════════════════════════════════════════════\x1b[0m\n");
-
-    #[derive(Serialize)]
-    struct DR { name: String, pdb: String, category: String, drugs: String,
-        qvs: f64, class: String, predicted_kie: f64, primary_rxn: String, n_sites: usize }
-    let mut results: Vec<DR> = Vec::new();
-    let (mut qc, mut qi, mut qm, mut cl) = (0usize, 0usize, 0usize, 0usize);
-    let mut cat_stats: std::collections::HashMap<String, (usize, usize)> = std::collections::HashMap::new();
-    let mut fail = 0usize;
-
-    for (i, t) in targets.iter().enumerate() {
-        eprint!("  [{:3}/{}] {:5} {:15} {:10}", i+1, targets.len(), t.pdb, t.name, t.category);
-        match download(t.pdb, &cache) {
-            Ok(pdb) => {
-                let (_, _, sites, qvs, ms) = full_scan(&pdb);
-                let marker = if qvs.total >= 40.0 { "\x1b[31m●\x1b[0m" }
-                             else if qvs.total >= 20.0 { "\x1b[33m●\x1b[0m" }
-                             else if qvs.total >= 8.0 { "\x1b[33m○\x1b[0m" }
-                             else { "\x1b[32m○\x1b[0m" };
-                eprintln!(" {} QVS={:5.1} [{:18}] KIE≈{:5.1} ({:.0}ms)",
-                    marker, qvs.total, qvs.class, qvs.predicted_kie, ms);
-                // Auto-diagnose: any kinase/protease that comes out as QC is suspicious
-                if (t.category == "Kinase" || t.category == "Protease") && qvs.total >= 20.0 {
-                    pdb_diag(&pdb, t.name);
-                    eprintln!("    \x1b[33m⚠ INVESTIGATE: {} ({}) classified QC but category={}\x1b[0m", t.name, t.pdb, t.category);
-                    for (si, site) in sites.iter().enumerate() {
-                        eprintln!("      site[{}]: {} → {} barrier={:.3}eV sub={} ({})",
-                            si, site.kind, site.rxn, site.barrier, site.has_substrate, site.substrate_name);
-                    }
-                }
-                let cat = t.category.to_string();
-                let entry = cat_stats.entry(cat.clone()).or_insert((0, 0));
-                entry.0 += 1;
-                if qvs.total >= 20.0 { entry.1 += 1; }
-                match qvs.class.as_str() {
-                    "QUANTUM-CRITICAL" => qc += 1,
-                    "QUANTUM-INFLUENCED" => qi += 1,
-                    "QUANTUM-MARGINAL" => qm += 1,
-                    _ => cl += 1,
-                }
-                results.push(DR { name: t.name.to_string(), pdb: t.pdb.to_string(),
-                    category: t.category.to_string(), drugs: t.drugs.to_string(),
-                    qvs: qvs.total, class: qvs.class, predicted_kie: qvs.predicted_kie,
-                    primary_rxn: qvs.primary_rxn, n_sites: sites.len() });
-            }
-            Err(e) => { eprintln!(" \x1b[31mFAIL: {}\x1b[0m", e); fail += 1; }
-        }
-    }
-
-    let n = results.len();
-    let quantum_total = qc + qi;
-    let quantum_pct = quantum_total as f64 / n.max(1) as f64 * 100.0;
-
-    if json {
-        println!("{}", serde_json::to_string_pretty(&results).unwrap_or_default());
-    } else {
-        eprintln!("\n  \x1b[31m\x1b[1m═══════════════════════════════════════════════════════════════\x1b[0m");
-        eprintln!("  \x1b[1m  THE QUANTUM VULNERABILITY OF THE PHARMACEUTICAL PIPELINE\x1b[0m");
-        eprintln!("  \x1b[31m\x1b[1m═══════════════════════════════════════════════════════════════\x1b[0m\n");
-        eprintln!("    Scanned:  {} FDA drug target enzymes", n);
-        eprintln!("    Failed:   {} (PDB download errors)\n", fail);
-        eprintln!("    \x1b[31m● QUANTUM-CRITICAL:   {:3} ({:5.1}%)\x1b[0m  ← Classical docking UNRELIABLE", qc, qc as f64/n.max(1) as f64*100.0);
-        eprintln!("    \x1b[33m● QUANTUM-INFLUENCED: {:3} ({:5.1}%)\x1b[0m  ← QM/MM recommended", qi, qi as f64/n.max(1) as f64*100.0);
-        eprintln!("    \x1b[33m○ QUANTUM-MARGINAL:   {:3} ({:5.1}%)\x1b[0m  ← Minor effects", qm, qm as f64/n.max(1) as f64*100.0);
-        eprintln!("    \x1b[32m○ CLASSICAL:          {:3} ({:5.1}%)\x1b[0m  ← Standard methods OK\n", cl, cl as f64/n.max(1) as f64*100.0);
-        eprintln!("    ╔═══════════════════════════════════════════════════════╗");
-        eprintln!("    ║  \x1b[31m\x1b[1m{:.1}% of FDA drug targets show quantum vulnerability\x1b[0m  ║", quantum_pct);
-        eprintln!("    ║  Classical computational drug design is incomplete   ║");
-        eprintln!("    ║  for these targets.                                  ║");
-        eprintln!("    ╚═══════════════════════════════════════════════════════╝\n");
-
-        // Per-category breakdown
-        eprintln!("    \x1b[1mPer-category quantum vulnerability:\x1b[0m");
-        let mut cats: Vec<_> = cat_stats.iter().collect();
-        cats.sort_by(|a, b| (b.1.1 as f64 / b.1.0.max(1) as f64)
-            .partial_cmp(&(a.1.1 as f64 / a.1.0.max(1) as f64)).unwrap_or(std::cmp::Ordering::Equal));
-        for (cat, (total, quantum)) in &cats {
-            let pct = *quantum as f64 / *total.max(&1) as f64 * 100.0;
-            let bar_len = (pct / 5.0) as usize;
-            let bar = "█".repeat(bar_len);
-            eprintln!("      {:15} {:3}/{:3} ({:5.1}%) {}", cat, quantum, total, pct, bar);
-        }
-
-        eprintln!("\n    Time: {:.1}s", t0.elapsed().as_secs_f64());
-
-        // ═══ WITHDRAWN / PROBLEMATIC DRUG ANALYSIS ═══
-        eprintln!("\n  \x1b[31m\x1b[1m═══ WITHDRAWN & PROBLEMATIC DRUGS — QUANTUM CORRELATION ═══\x1b[0m\n");
-        eprintln!("    Known withdrawn/problematic small-molecule enzyme inhibitors:");
-        eprintln!("    Drug               Target     Status              QV of Target");
-        eprintln!("    ────────────────── ────────── ─────────────────── ───────────────");
-        // Match withdrawn drugs against our scan results
-        let withdrawn = vec![
-            ("Rofecoxib (Vioxx)", "COX-2", "WITHDRAWN 2004 (CV events, 88k+ heart attacks)"),
-            ("Valdecoxib (Bextra)", "COX-2", "WITHDRAWN 2005 (CV + skin reactions)"),
-            ("Cerivastatin (Baycol)", "HMGCR", "WITHDRAWN 2001 (rhabdomyolysis)"),
-            ("Troglitazone (Rezulin)", "CYP3A4", "WITHDRAWN 2000 (hepatotoxicity, CYP-mediated)"),
-            ("Mibefradil (Posicor)", "CYP3A4", "WITHDRAWN 1998 (CYP3A4 interactions)"),
-            ("Terfenadine (Seldane)", "CYP3A4", "WITHDRAWN 1998 (CYP3A4 interactions → cardiac)"),
-            ("Cisapride (Propulsid)", "CYP3A4", "WITHDRAWN 2000 (CYP3A4 interactions → cardiac)"),
-            ("Nefazodone (Serzone)", "CYP3A4", "WITHDRAWN 2004 (hepatotoxicity)"),
-            ("Phenacetin", "CYP1A2", "WITHDRAWN 1983 (nephropathy, CYP activation)"),
-            ("Tolcapone (Tasmar)", "COMT", "RESTRICTED (hepatotoxicity)"),
-            ("Zileuton (Zyflo)", "5-LOX", "RESTRICTED (hepatotoxicity, CYP-mediated)"),
-            ("Phenelzine (Nardil)", "MAO-A", "RESTRICTED (hypertensive crisis)"),
-            ("Iproniazid", "MAO-A", "WITHDRAWN 1961 (hepatotoxicity)"),
-            ("Allopurinol", "XO", "ACTIVE but BLACK BOX (severe skin reactions)"),
-        ];
-        let mut qc_withdrawn = 0; let mut cl_withdrawn = 0;
-        for (drug, target, status) in &withdrawn {
-            let qv = results.iter().find(|r| r.name == *target)
-                .map(|r| r.class.clone()).unwrap_or("(not scanned)".into());
-            let marker = if qv.contains("CRITICAL") { "\x1b[31m● QC\x1b[0m" }
-                        else if qv.contains("INFLUENCED") { "\x1b[33m● QI\x1b[0m" }
-                        else { "\x1b[32m○ CL\x1b[0m" };
-            if qv.contains("CRITICAL") || qv.contains("INFLUENCED") { qc_withdrawn += 1; }
-            else { cl_withdrawn += 1; }
-            eprintln!("    {:22} {:10} {:27} {}", drug, target, status, marker);
-        }
-        let total_withdrawn = qc_withdrawn + cl_withdrawn;
-        let qc_pct_w = qc_withdrawn as f64 / total_withdrawn.max(1) as f64 * 100.0;
-        eprintln!("\n    ╔═══════════════════════════════════════════════════════════╗");
-        eprintln!("    ║  \x1b[31m\x1b[1m{:.0}% of withdrawn/problematic drugs target QC enzymes\x1b[0m    ║", qc_pct_w);
-        eprintln!("    ║  vs {:.1}% quantum-critical in overall FDA target pool       ║", quantum_pct);
-        eprintln!("    ║  Enrichment: {:.1}x                                          ║",
-            qc_pct_w / quantum_pct.max(0.1));
-        eprintln!("    ╚═══════════════════════════════════════════════════════════╝");
-
-        // ═══ FISHER'S EXACT TEST ═══
-        // 2x2 contingency table:
-        //                    QC Target    Classical Target
-        // Withdrawn/problem:    a              b           | a+b
-        // Not withdrawn:        c              d           | c+d
-        //                      a+c            b+d          | N
-        let a = qc_withdrawn as u64;                          // withdrawn + QC
-        let b = cl_withdrawn as u64;                          // withdrawn + classical
-        let qc_not_withdrawn = qc as u64 - a;                // QC targets without withdrawn drugs
-        let cl_not_withdrawn = (n as u64 - qc as u64) - b;   // classical targets without withdrawn drugs
-        let c = qc_not_withdrawn;
-        let d = cl_not_withdrawn;
-        let nn = a + b + c + d;
-
-        eprintln!("\n  \x1b[31m\x1b[1m═══ FISHER'S EXACT TEST — STATISTICAL SIGNIFICANCE ═══\x1b[0m\n");
-        eprintln!("    2×2 Contingency Table:");
-        eprintln!("                        QC Target  Classical Target  Total");
-        eprintln!("    Withdrawn/problem:  {:5}      {:5}              {:5}", a, b, a+b);
-        eprintln!("    Not withdrawn:      {:5}      {:5}              {:5}", c, d, c+d);
-        eprintln!("    Total:              {:5}      {:5}              {:5}", a+c, b+d, nn);
-
-        // Fisher's exact test: p = C(a+b,a) * C(c+d,c) / C(N,a+c)
-        // We compute -log(p) to avoid underflow, then convert
-        // log-factorial via Stirling or direct summation
-        let log_fact = |n: u64| -> f64 {
-            if n <= 1 { return 0.0; }
-            (2..=n).map(|i| (i as f64).ln()).sum()
-        };
-        let log_choose = |n: u64, k: u64| -> f64 {
-            if k > n { return f64::NEG_INFINITY; }
-            log_fact(n) - log_fact(k) - log_fact(n - k)
-        };
-        // p-value: sum probabilities for all tables as extreme or more extreme than observed
-        let r1 = a + b; // row 1 total
-        let c1 = a + c; // col 1 total
-        let log_denom = log_choose(nn, c1);
-        // observed probability
-        let log_p_observed = log_choose(r1, a) + log_choose(nn - r1, c) - log_denom;
-        // one-tailed: sum over a_i >= a (more extreme association)
-        let mut p_value = 0.0f64;
-        let a_max = r1.min(c1);
-        for a_i in 0..=a_max {
-            let c_i = c1 - a_i;
-            let b_i = r1 - a_i;
-            let d_i = (nn - r1) - c_i;
-            if c_i > nn - r1 { continue; }
-            let log_p_i = log_choose(r1, a_i) + log_choose(nn - r1, c_i) - log_denom;
-            if log_p_i <= log_p_observed + 1e-10 { // as extreme or more
-                p_value += log_p_i.exp();
-            }
-        }
-
-        let significance = if p_value < 0.001 { "★★★ p < 0.001 — HIGHLY SIGNIFICANT" }
-                          else if p_value < 0.01 { "★★  p < 0.01  — SIGNIFICANT" }
-                          else if p_value < 0.05 { "★   p < 0.05  — SIGNIFICANT" }
-                          else { "    p ≥ 0.05  — NOT SIGNIFICANT" };
-
-        // Odds ratio
-        let odds_ratio = if b > 0 && c > 0 { (a as f64 * d as f64) / (b as f64 * c as f64) } else { f64::INFINITY };
-
-        eprintln!("\n    Fisher's Exact Test (one-tailed):");
-        eprintln!("    p-value:     {:.2e}", p_value);
-        eprintln!("    Odds ratio:  {:.1}", odds_ratio);
-        eprintln!("    {}", significance);
-
-        if p_value < 0.001 {
-            eprintln!("\n    ╔═══════════════════════════════════════════════════════════╗");
-            eprintln!("    ║  \x1b[31m\x1b[1mThe correlation between quantum-critical targets and\x1b[0m    ║");
-            eprintln!("    ║  \x1b[31m\x1b[1mdrug withdrawal is statistically significant.\x1b[0m          ║");
-            eprintln!("    ║  This is NOT random. This demands investigation.       ║");
-            eprintln!("    ╚═══════════════════════════════════════════════════════════╝");
-        }
-
-        // ═══ NOVEL PREDICTIONS — UNMEASURED QC TARGETS ═══
-        eprintln!("\n  \x1b[31m\x1b[1m═══ NOVEL PREDICTIONS — UNTESTED QUANTUM-CRITICAL TARGETS ═══\x1b[0m\n");
-        eprintln!("    These FDA drug targets are classified QUANTUM-CRITICAL by MEG-APSU");
-        eprintln!("    but have NO published KIE measurement. Each is a testable prediction.\n");
-        // Enzymes with well-known KIE measurements (from our training + blind sets)
-        let known_kie = vec![
-            "CYP3A4","CYP1A2","CYP2C9","CYP2D6","CYP2E1","CYP2C19","CYP2A6","CYP2B6","CYP2C8",
-            "MAO-A","MAO-B","COX-1","COX-2","5-LOX","15-LOX-1","XO","hDHFR","DHODH",
-            "COMT","LDHA","G6PD","TH","hTS",
-            // Steroidogenic P450s have KIE studies
-            "CYP19A1","CYP17A1",
-        ];
-        let mut novel_count = 0;
-        for r in &results {
-            if r.class == "QUANTUM-CRITICAL" && !known_kie.iter().any(|k| r.name == *k) {
-                novel_count += 1;
-                eprintln!("    {:2}. {:15} (PDB: {}) QVS={:.1} KIE≈{:.1} — {}",
-                    novel_count, r.name, r.pdb, r.qvs, r.predicted_kie, r.drugs);
-            }
-        }
-        eprintln!("\n    \x1b[1m{} novel predictions.\x1b[0m", novel_count);
-        eprintln!("    Each can be verified by deuterium KIE measurement.");
-        eprintln!("    Contact: meg.depth@proton.me · sectio-aurea-q\n");
-
-        eprintln!("    sectio-aurea-q · MEGALODON Research · 2026");
-        eprintln!("  \x1b[31m\x1b[1m═══════════════════════════════════════════════════════════════\x1b[0m\n");
+        _=>{eprintln!("  meg-apsu scan <pdb> [--json]     one structure");
+            eprintln!("  meg-apsu batch <dir> [--json]    all .pdb files in a directory");
+            eprintln!("  meg-apsu bench dev|test|test14   reproduce the benchmarks (frozen test sets)");}
     }
 }
 
@@ -1764,79 +732,3 @@ fn held_neg() -> Vec<Target> { vec![
     Target{name:"MMP9",pdb:"1GKC",kie:1.0},           // Matrix metalloprotease 9 (Zn)
     Target{name:"PPase",pdb:"1FAJ",kie:1.0},          // Inorganic pyrophosphatase
 ]}
-
-fn blind_test() {
-    let t0 = Instant::now();
-    let cache = format!("{}/.meg-apsu-pdb-cache", env::var("HOME").unwrap_or("/tmp".into()));
-    let _ = fs::create_dir_all(&cache);
-    let pv = held_pos(); let nv = held_neg();
-    let np = pv.len(); let nn = nv.len();
-    eprintln!("\n  \x1b[31m\x1b[1m═══ MEG-APSU v1.2.1 — BLIND HELD-OUT TEST ═══\x1b[0m");
-    eprintln!("  \x1b[2m{} positive + {} negative = {} targets · ZERO TUNING\x1b[0m", np, nn, np+nn);
-    eprintln!("  \x1b[2mNone of these enzymes were used during algorithm development.\x1b[0m\n");
-
-    let mut pq = Vec::new(); let mut pk = Vec::new(); let mut nq = Vec::new(); let mut pkie = Vec::new();
-    eprintln!("  \x1b[32m[HELD-OUT POSITIVE: {} tunneling enzymes]\x1b[0m", np);
-    for (i,t) in pv.iter().enumerate() {
-        eprint!("  [{:2}/{}] {:5} {:10}", i+1, np, t.pdb, t.name);
-        match download(t.pdb, &cache) {
-            Ok(pdb) => {
-                let (_,_,sites,qvs,ms) = full_scan(&pdb);
-                let rad = sites.iter().filter(|s| s.rxn.contains("Radical")).count();
-                let hyd = sites.iter().filter(|s| s.rxn.contains("Hydride")).count();
-                let rel = sites.iter().filter(|s| s.rxn.contains("Relay")).count();
-                let ok = if qvs.total >= 10.0 { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" };
-                eprintln!(" {} QVS={:5.1} [{:18}] KIE≈{:5.1}(lit={:4.1}) rad={} hyd={} rel={} ({:.0}ms)",
-                    ok, qvs.total, qvs.class, qvs.predicted_kie, t.kie, rad, hyd, rel, ms);
-                if qvs.total < 10.0 { pdb_diag(&pdb, t.name); }
-                pq.push(qvs.total); pk.push(t.kie); pkie.push(qvs.predicted_kie);
-            }
-            Err(e) => eprintln!(" \x1b[31mFAIL: {}\x1b[0m", e),
-        }
-    }
-    eprintln!("\n  \x1b[33m[HELD-OUT NEGATIVE: {} classical enzymes]\x1b[0m", nn);
-    for (i,t) in nv.iter().enumerate() {
-        eprint!("  [{:2}/{}] {:5} {:10}", i+1, nn, t.pdb, t.name);
-        match download(t.pdb, &cache) {
-            Ok(pdb) => {
-                let (_,_,_,qvs,ms) = full_scan(&pdb);
-                let ok = if qvs.total < 10.0 { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" };
-                eprintln!(" {} QVS={:5.1} [{:18}] KIE≈{:5.1} ({:.0}ms)", ok, qvs.total, qvs.class, qvs.predicted_kie, ms);
-                if qvs.total >= 10.0 { pdb_diag(&pdb, t.name); }
-                nq.push(qvs.total);
-            }
-            Err(e) => eprintln!(" \x1b[31mFAIL: {}\x1b[0m", e),
-        }
-    }
-    // Stats
-    let d = cohens_d(&pq, &nq);
-    let mut bt=10.0_f64; let mut bj=-1.0_f64;
-    for tc in (5..=80).map(|x| x as f64) {
-        let s = pq.iter().filter(|&&q|q>=tc).count() as f64/pq.len().max(1) as f64;
-        let sp = nq.iter().filter(|&&q|q<tc).count() as f64/nq.len().max(1) as f64;
-        if s+sp-1.0>bj { bj=s+sp-1.0; bt=tc; }
-    }
-    let tp=pq.iter().filter(|&&q|q>=bt).count(); let fnc=pq.len()-tp;
-    let tn=nq.iter().filter(|&&q|q<bt).count(); let fp=nq.len()-tn;
-    let pm=pq.iter().sum::<f64>()/pq.len().max(1) as f64;
-    let nm=nq.iter().sum::<f64>()/nq.len().max(1) as f64;
-    let mut conc=0usize; let mut tied=0usize;
-    for &pv in &pq { for &nv in &nq { if pv>nv{conc+=1;}else if(pv-nv).abs()<0.01{tied+=1;} }}
-    let auc=(conc as f64+0.5*tied as f64)/(pq.len()*nq.len()).max(1) as f64;
-    let kr2 = pearson(&pk, &pkie);
-
-    eprintln!("\n  \x1b[31m\x1b[1m═══════════════════════════════════════════════════════\x1b[0m");
-    eprintln!("  \x1b[1m  BLIND HELD-OUT RESULTS ({} targets)\x1b[0m", pq.len()+nq.len());
-    eprintln!("  \x1b[1m  ⚠ NONE of these were used during development ⚠\x1b[0m");
-    eprintln!("    Pos mean QVS: {:.1}  |  Neg mean QVS: {:.1}  |  Δ = {:.1}", pm, nm, pm-nm);
-    eprintln!("    \x1b[33mCohen's d:       {:.3}\x1b[0m", d);
-    eprintln!("    \x1b[33mROC AUC:         {:.3}\x1b[0m", auc);
-    eprintln!("    \x1b[33mPredKIE↔KIE r²:  {:.4}\x1b[0m", kr2);
-    eprintln!("    Threshold: {:.0} (J={:.3})", bt, bj);
-    eprintln!("    Sensitivity: {:.1}% ({}/{})", tp as f64/pq.len().max(1) as f64*100.0, tp, pq.len());
-    eprintln!("    Specificity: {:.1}% ({}/{})", tn as f64/nq.len().max(1) as f64*100.0, tn, nq.len());
-    eprintln!("    Accuracy:    {:.1}%", (tp+tn) as f64/(pq.len()+nq.len()).max(1) as f64*100.0);
-    eprintln!("    Confusion: TP={} FN={} TN={} FP={}", tp, fnc, tn, fp);
-    eprintln!("    Time: {:.1}s", t0.elapsed().as_secs_f64());
-    eprintln!("  \x1b[31m\x1b[1m═══════════════════════════════════════════════════════\x1b[0m\n");
-}

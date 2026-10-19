@@ -9,7 +9,7 @@ use crate::{download, full_scan, parse_pdb, is_heme, is_nad_fad, is_folate, is_p
 use std::sync::atomic::Ordering;
 use std::{env, fs};
 
-const THRESHOLD: f64 = 10.0;
+const THRESHOLD: f64 = crate::SCORE_THRESHOLD;
 
 #[derive(Clone, Copy, PartialEq)]
 enum Label { Tunneling, Classical, Control }

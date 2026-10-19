@@ -1,0 +1,116 @@
+enzyme,pdb,category,approved_drugs
+CYP1A2,2HI4,P450,"fluvoxamine,ciprofloxacin"
+CYP2A6,1Z10,P450,methoxsalen
+CYP2B6,3IBD,P450,ticlopidine
+CYP2C8,1PQ2,P450,montelukast
+CYP2C19,4GQS,P450,"omeprazole,esomeprazole"
+CYP2E1,3E6I,P450,"disulfiram,isoniazid"
+CYP3A4,1TQN,P450,"ketoconazole,ritonavir,itraconazole"
+CYP11A1,3N9Y,P450,aminoglutethimide
+CYP11B1,6M7X,P450,"metyrapone,osilodrostat"
+CYP11B2,4DVQ,P450,osilodrostat
+CYP17A1,3RUK,P450,abiraterone
+CYP19A1,3EQM,P450,"letrozole,anastrozole,exemestane"
+CYP51A1,3JUV,P450,"fluconazole,voriconazole,posaconazole"
+MAO-A,2Z5X,MAO,"moclobemide,phenelzine,tranylcypromine"
+MAO-B,1GOS,MAO,"selegiline,rasagiline,safinamide"
+COX-1,1EQG,COX,"aspirin,ibuprofen,naproxen"
+COX-2,3HS5,COX,"celecoxib,rofecoxib,etoricoxib"
+5-LOX,3O8Y,LOX,zileuton
+15-LOX-1,1LOX,LOX,(experimental)
+XO,1FIQ,XO,"allopurinol,febuxostat"
+hDHFR,1DRF,DHFR,"methotrexate,pemetrexed,trimethoprim"
+HMGCR,1HWK,Statin,"atorvastatin,simvastatin,rosuvastatin"
+PDE3A,1SO2,PDE,"milrinone,cilostazol"
+PDE4B,1F0J,PDE,"roflumilast,apremilast,crisaborole"
+PDE4D,1OYN,PDE,roflumilast
+PDE5A,1UDT,PDE,"sildenafil,tadalafil,vardenafil"
+PDE10A,2OUP,PDE,(experimental)
+AChE,4EY7,AChE,"donepezil,rivastigmine,galantamine"
+ACE,1O86,ACE,"enalapril,lisinopril,ramipril,captopril"
+ACE2,1R42,ACE,(COVID target)
+MMP-1,1CGE,MMP,doxycycline
+MMP-2,1CK7,MMP,(experimental)
+MMP-9,1GKC,MMP,doxycycline
+MMP-13,1YOU,MMP,(experimental)
+CA-I,1HCB,CA,acetazolamide
+CA-II,1CA2,CA,"acetazolamide,dorzolamide,brinzolamide"
+CA-IX,3IAI,CA,"(experimental, cancer)"
+CA-XII,1JCZ,CA,(experimental)
+ABL1,1IEP,Kinase,"imatinib,dasatinib,nilotinib,bosutinib"
+EGFR,1M17,Kinase,"erlotinib,gefitinib,osimertinib,afatinib"
+BRAF,1UWH,Kinase,"vemurafenib,dabrafenib,encorafenib"
+ALK,2XP2,Kinase,"crizotinib,ceritinib,alectinib"
+JAK1,3EYG,Kinase,"tofacitinib,baricitinib,upadacitinib"
+JAK2,3FUP,Kinase,"ruxolitinib,fedratinib"
+BTK,3GEN,Kinase,"ibrutinib,acalabrutinib,zanubrutinib"
+MEK1,3EQI,Kinase,"trametinib,cobimetinib,binimetinib"
+CDK4,2W96,Kinase,"palbociclib,ribociclib,abemaciclib"
+CDK6,1BI7,Kinase,"palbociclib,ribociclib"
+VEGFR2,1YWN,Kinase,"sunitinib,sorafenib,axitinib,lenvatinib"
+FGFR1,3C4F,Kinase,"erdafitinib,pemigatinib"
+MET,3LQ8,Kinase,"capmatinib,tepotinib"
+RET,2IVT,Kinase,"selpercatinib,pralsetinib"
+PI3Kα,4JPS,Kinase,alpelisib
+PI3Kδ,4XE0,Kinase,"idelalisib,duvelisib"
+mTOR,4DRH,Kinase,"everolimus,temsirolimus"
+AKT1,3O96,Kinase,capivasertib
+SRC,2SRC,Kinase,"dasatinib,bosutinib"
+KIT,1T46,Kinase,"imatinib,sunitinib,regorafenib"
+FLT3,4XUF,Kinase,"midostaurin,gilteritinib,quizartinib"
+PDGFRA,5K5X,Kinase,"imatinib,avapritinib"
+ERBB2,3PP0,Kinase,"lapatinib,neratinib,tucatinib"
+TRK-A,4AOJ,Kinase,"larotrectinib,entrectinib"
+ROS1,3ZBF,Kinase,"crizotinib,entrectinib"
+RAF1,3OMV,Kinase,sorafenib
+AURKA,2DWB,Kinase,(experimental)
+PLK1,2RKU,Kinase,(experimental)
+WEE1,5V5Y,Kinase,adavosertib
+HIV-PR,1HPV,Protease,"ritonavir,darunavir,atazanavir"
+HCV-NS3,1A1R,Protease,"boceprevir,telaprevir,simeprevir"
+Thrombin,1PPB,Protease,"dabigatran,argatroban"
+FactorXa,1FAX,Protease,"rivaroxaban,apixaban,edoxaban"
+DPP4,1X70,Protease,"sitagliptin,saxagliptin,linagliptin"
+Neprilysin,1DMT,Protease,sacubitril
+Renin,2V0Z,Protease,aliskiren
+Proteasome,5LF3,Protease,"bortezomib,carfilzomib,ixazomib"
+Cathepsin-K,1ATK,Protease,"(odanacatib, discontinued)"
+TOP1,1T8I,Topo,"irinotecan,topotecan"
+TOP2A,5GWK,Topo,"doxorubicin,etoposide"
+hTS,2TSC,TS,"5-fluorouracil,capecitabine,pemetrexed"
+DHODH,1D3G,DHODH,"leflunomide,teriflunomide"
+IMPDH2,1NF7,IMPDH,mycophenolate
+PARP1,4DQY,PARP,"olaparib,rucaparib,niraparib,talazoparib"
+HDAC1,4BKX,HDAC,"vorinostat,romidepsin,panobinostat"
+HDAC6,5EDU,HDAC,ricolinostat (experimental)
+IDH1-R132H,3MAP,IDH,ivosidenib
+IDH2-R140Q,5I96,IDH,enasidenib
+nNOS,4D1N,NOS,(experimental)
+iNOS,1NSI,NOS,"(experimental, anti-inflammatory)"
+eNOS,4D1O,NOS,(NO donors indirect)
+AKR1B1,1ADS,AKR,epalrestat (Japan)
+LDHA,1I10,LDH,"(experimental, cancer)"
+FASN,2PX6,FAS,(TVB-2640 experimental)
+SQS,1EZF,SQS,"(experimental, cholesterol)"
+TH,2TOH,TH,metyrosine
+DBH,4ZEL,DBH,disulfiram (indirect)
+COMT,3BWM,COMT,"entacapone,tolcapone,opicapone"
+ADA,1ADD,ADA,pentostatin
+PNP,1M73,PNP,forodesine (Japan)
+G6PD,1QKI,G6PD,(pharmacogenomics target)
+CYP51-fungal,5TZ1,CYP51,"fluconazole,itraconazole"
+InhA-Mtb,2B35,Bacterial,isoniazid
+DHPS,1AJ0,Bacterial,"sulfamethoxazole,sulfadiazine"
+MurA,1UAE,Bacterial,fosfomycin
+GyrB,1KZN,Bacterial,novobiocin
+HIV-RT,1RTH,Viral,"zidovudine,efavirenz,tenofovir"
+HIV-IN,3OYA,Viral,"raltegravir,dolutegravir"
+NS5B-HCV,1NB7,Viral,"sofosbuvir,dasabuvir"
+NS5A-HCV,3FQQ,Viral,"ledipasvir,daclatasvir"
+Neuraminidase,2HU4,Viral,"oseltamivir,zanamivir"
+Mpro-SARS2,6LU7,Viral,nirmatrelvir (paxlovid)
+RdRp-SARS2,7BV2,Viral,"remdesivir,molnupiravir"
+11βHSD1,2BEL,HSD,"(experimental, diabetes)"
+17βHSD1,1FDT,HSD,"(experimental, cancer)"
+SDH-complex,1NEK,SDH,(mitochondrial)
+DHODH-Pf,1TV5,Bacterial,DSM265 (antimalarial)
