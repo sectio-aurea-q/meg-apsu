@@ -1,6 +1,6 @@
 [package]
 name = "meg-apsu"
-version = "1.5.0"
+version = "1.5.1"
 edition = "2021"
 authors = ["sectio-aurea-q <meg.depth@proton.me>"]
 description = "Structure-based triage of hydrogen-tunnelling enzymes from PDB files"
