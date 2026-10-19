@@ -688,7 +688,7 @@ fn main() {
         "batch"=>if let Some(d)=args.get(2){batch_scan(d,json);}else{eprintln!("  meg-apsu batch <dir> [--json]");},
         _=>{eprintln!("  meg-apsu scan <pdb> [--json]     one structure");
             eprintln!("  meg-apsu batch <dir> [--json]    all .pdb files in a directory");
-            eprintln!("  meg-apsu bench dev|test|test14   reproduce the benchmarks (frozen test sets)");}
+            eprintln!("  meg-apsu bench dev|test|test14|test15  reproduce the benchmarks (frozen test sets)");}
     }
 }
 

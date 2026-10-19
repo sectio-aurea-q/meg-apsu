@@ -61,6 +61,7 @@ Reproduce:
 cargo build --release
 ./target/release/meg-apsu bench test      # frozen 2026-10-06
 ./target/release/meg-apsu bench test14    # frozen 2026-10-14
+./target/release/meg-apsu bench test15    # frozen 2026-10-19 (54 new structures; not yet evaluated)
 ./target/release/meg-apsu bench dev
 ```
 

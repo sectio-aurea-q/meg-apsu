@@ -1,0 +1,1433 @@
+[
+ {
+  "label": "T",
+  "name": "Dopamine beta-monooxygenase (DBH / DbetaM)",
+  "organism": "Homo sapiens (structure); Bos taurus (kinetics)",
+  "pdb": "4ZEL",
+  "cofactor": "2 x mononuclear Cu (CuH/CuM), X-ray 2.9 A, plus NAG glycans",
+  "evidence": "Intrinsic primary KIE kH/kD = 9.4 +/- 1.3 (pH 6.0) and 10.9 +/- 1.9 (without fumarate) for the benzylic C-H cleavage step, from combined D(V/K) and T(V/K) double-label measurement",
+  "doi": "10.1021/bi00282a011",
+  "notes": "Cu monooxygenase, H-atom abstraction from substrate C-beta. Species mismatch: KIE measured on bovine adrenal DbetaM, for which no X-ray structure exists; human orthologue structure given (structure DOI 10.1126/sciadv.1500980). Supporting HAT/O-18 KIE paper: 10.1021/bi00167a030.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Human dopamine beta-hydroxylase",
+   "method": "X-ray",
+   "resolution": 2.9,
+   "ligands": [
+    "CU",
+    "NAG"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Magnitude of intrinsic isotope effects in the dopamine .beta.-monooxygenase reaction",
+   "journal": "Biochemistry",
+   "year": 1983
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "T",
+  "name": "Aryl-alcohol oxidase (AAO)",
+  "organism": "Pleurotus eryngii",
+  "pdb": "5OC1",
+  "cofactor": "FAD (non-covalent) plus p-anisic acid in the active site, X-ray 2.3 A",
+  "evidence": "Temperature dependence of the primary KIE on hydride transfer from substrate C-alpha to FAD N5 (pre-steady-state and steady-state with deuterated substrates) interpreted as environmentally coupled quantum-mechanical hydride tunnelling; Tyr92 variants shift the KIE temperature-dependence pattern",
+  "doi": "10.1039/c7cp05904c",
+  "notes": "GMC superfamily. The cited tunnelling paper is also the primary citation of this structure. Stereospecific hydride transfer with primary KIE ca. 6 (10.1002/cbic.201100709).",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal structure of aryl-alcohol oxidase from Pleurotus eryngii in complex with p-anisic acid",
+   "method": "X-ray",
+   "resolution": 2.3,
+   "ligands": [
+    "ANN",
+    "FAD",
+    "GOL"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Protein dynamics promote hydride tunnelling in substrate oxidation by aryl-alcohol oxidase",
+   "journal": "Physical Chemistry Chemical Physics",
+   "year": 2017
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "T",
+  "name": "Heterotetrameric sarcosine oxidase (TSOX)",
+  "organism": "Corynebacterium sp. U-96",
+  "pdb": "1X31",
+  "cofactor": "FAD + FMN + NAD + Zn, with N,N-dimethylglycine bound, X-ray 2.15 A",
+  "evidence": "KIE on flavin reduction (k_red) of approximately 19 at pH 6.2 for cleavage of the sarcosine C-alpha-H bond, decreasing to 8 at high pH",
+  "doi": "10.1093/jb/mvs045",
+  "notes": "For the homologous Arthrobacter sp. 1-IN TSOX the same C-H cleavage step was explicitly assigned to ground-state quantum tunnelling driven by protein dynamics (10.1021/bi991941v); the Arthrobacter enzyme has no X-ray structure, so the Corynebacterium U-96 structure matching the KIE=19 measurement is used.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal Structure of Heterotetrameric Sarcosine Oxidase from Corynebacterium sp. U-96",
+   "method": "X-ray",
+   "resolution": 2.15,
+   "ligands": [
+    "DMG",
+    "FAD",
+    "FMN",
+    "NAD",
+    "SO4",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Deuterium kinetic isotope effects in heterotetrameric sarcosine oxidase from Corynebacterium sp. U-96: the anionic form of the substrate in the enzyme–substrate complex is a reactive species",
+   "journal": "The Journal of Biochemistry",
+   "year": 2012
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "T",
+  "name": "Cytochrome P450 OleT (fatty-acid peroxygenase / decarboxylase)",
+  "organism": "Jeotgalicoccus sp. ATCC 8456",
+  "pdb": "4L40",
+  "cofactor": "Heme b (Fe-protoporphyrin IX) plus icosanoic acid substrate, X-ray 2.5 A",
+  "evidence": "Experimental deuterium KIE and its temperature dependence for C-beta-H abstraction by Compound I; quantum-dynamics calculations show hydrogen tunnelling is essential to reproduce the measured KIE, its temperature dependence and the activation energies",
+  "doi": "10.1021/acs.jpcb.1c10280",
+  "notes": "UNSURE: tunnelling assignment rests on combined experiment and theory; the abstract seen quotes no KIE >= 10, no temperature-independent KIE and no A_H/A_D value, so the strict numeric criteria are not demonstrably met. Structure DOI 10.1074/jbc.M113.527325.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Structure of the P450 OleT with a C20 fatty acid substrate bound",
+   "method": "X-ray",
+   "resolution": 2.5,
+   "ligands": [
+    "DCR",
+    "HEM"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Experimental and Theoretical Examination of the Kinetic Isotope Effect in Cytochrome P450 Decarboxylase OleT",
+   "journal": "The Journal of Physical Chemistry B",
+   "year": 2022
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "T",
+  "name": "Ferredoxin-NADP+ reductase (FNR)",
+  "organism": "Anabaena PCC 7119 (Nostoc sp.)",
+  "pdb": "1QUE",
+  "cofactor": "FAD, X-ray 1.8 A",
+  "evidence": "Temperature dependence of hydride and deuteride transfer between NADP(H) and FAD analysed with a full tunnelling model with coupled environmental fluctuations; isotope effects on the Arrhenius pre-exponential factors indicate tunnelling with active donor-acceptor-distance dynamics",
+  "doi": "10.1016/j.bbabio.2014.06.003",
+  "notes": "UNSURE: tunnelling explicitly claimed from isotope effects on Arrhenius prefactors, but the numeric A_H/A_D value was not visible in the retrieved abstract. Related earlier work 10.1016/j.bbabio.2010.05.006. Structure DOI 10.1006/jmbi.1996.0553.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "X-RAY STRUCTURE OF THE FERREDOXIN:NADP+ REDUCTASE FROM THE CYANOBACTERIUM ANABAENA PCC 7119 AT 1.8 ANGSTROMS",
+   "method": "X-ray",
+   "resolution": 1.8,
+   "ligands": [
+    "FAD",
+    "SO4"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Dynamics of the active site architecture in plant-type ferredoxin-NADP+ reductases catalytic complexes",
+   "journal": "Biochimica et Biophysica Acta (BBA) - Bioenergetics",
+   "year": 2014
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "T",
+  "name": "NAD-malic enzyme (NAD-ME)",
+  "organism": "Ascaris suum",
+  "pdb": "1LLQ",
+  "cofactor": "NAD bound (divalent activator Mg/Mn/Cd in solution assays), X-ray 2.3 A",
+  "evidence": "Intrinsic primary KIE for the hydride-transfer step significantly greater than the semiclassical limit with Cd2+ as activator, indicating a substantial tunnelling contribution; alpha-secondary tritium KIEs give an anomalous Swain-Schaad exponent (3.3 versus 3.26 semiclassical, and 2.2 for the other substrate pair) attributed to tunnelling and coupled motion",
+  "doi": "10.1021/bi00010a015",
+  "notes": "Second supporting DOI (Swain-Schaad, coupled motion): 10.1021/bi982439y. Hydride transfer from malate C2 to NAD+ precedes decarboxylation. Structure DOI 10.1021/bi0255120.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal Structure of Malic Enzyme from Ascaris suum Complexed with Nicotinamide Adenine Dinucleotide",
+   "method": "X-ray",
+   "resolution": 2.3,
+   "ligands": [
+    "NAD"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Metal Ion Activator on Intrinsic Isotope Effects of Hydride Transfer and Decarboxylation in the Reaction Catalyzed by the NAD-Malic Enzyme from Ascaris suum",
+   "journal": "Biochemistry",
+   "year": 1995
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Alkaline phosphatase",
+  "organism": "Escherichia coli",
+  "pdb": "3TG0",
+  "cofactor": "2 Zn + 1 Mg + inorganic phosphate, X-ray 1.2 A",
+  "evidence": "Phosphomonoester hydrolysis by two-metal-ion catalysis through a covalent phosphoseryl intermediate; no C-H bond is made or broken",
+  "doi": "10.1016/0022-2836(91)90724-k",
+  "notes": "Mechanism reference is the structure-based two-metal-ion mechanism paper. Wild-type enzyme with bound phosphate (structure DOI 10.1016/j.jmb.2011.10.040). Hard case: binuclear Zn plus Mg site with no redox chemistry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "E. coli alkaline phosphatase with bound inorganic phosphate",
+   "method": "X-ray",
+   "resolution": 1.2,
+   "ligands": [
+    "MG",
+    "PO4",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Reaction mechanism of alkaline phosphatase based on crystal structures",
+   "journal": "Journal of Molecular Biology",
+   "year": 1991
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Protein tyrosine phosphatase 1B (PTP1B)",
+  "organism": "Homo sapiens",
+  "pdb": "1BZH",
+  "cofactor": "no metal or redox cofactor (Cys215 nucleophile), X-ray 2.1 A",
+  "evidence": "Phosphoryl transfer to an active-site cysteine thiolate and hydrolysis of the phosphocysteine intermediate; P-O chemistry only, no H transfer from carbon",
+  "doi": "10.1021/bi9816958",
+  "notes": "DOI is the primary citation of this entry (active-site mechanism study).",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Cyclic peptide inhibitor of human PTP1B",
+   "method": "X-ray",
+   "resolution": 2.1,
+   "ligands": []
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structural Basis for Inhibition of the Protein Tyrosine Phosphatase 1B by Phosphotyrosine Peptide Mimetics<sup>,</sup>",
+   "journal": "Biochemistry",
+   "year": 1998
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Adenylate kinase",
+  "organism": "Escherichia coli K-12",
+  "pdb": "1AKE",
+  "cofactor": "Ap5A bisubstrate analogue, X-ray 2.0 A",
+  "evidence": "Mg2+-assisted in-line phosphoryl transfer between ATP and AMP, rate-limited by domain closure; no C-H chemistry",
+  "doi": "10.1016/0022-2836(92)90582-5",
+  "notes": "DOI is the primary citation of this Ap5A complex (Mueller & Schulz).",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "STRUCTURE OF THE COMPLEX BETWEEN ADENYLATE KINASE FROM ESCHERICHIA COLI AND THE INHIBITOR AP5A REFINED AT 1.9 ANGSTROMS RESOLUTION: A MODEL FOR A CATALYTIC TRANSITION STATE",
+   "method": "X-ray",
+   "resolution": 2.0,
+   "ligands": [
+    "AP5"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structure of the complex between adenylate kinase from Escherichia coli and the inhibitor Ap5A refined at 1.9 Å resolution",
+   "journal": "Journal of Molecular Biology",
+   "year": 1992
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Cyclin-dependent kinase 2 (CDK2)",
+  "organism": "Homo sapiens",
+  "pdb": "1HCK",
+  "cofactor": "ATP + Mg2+, X-ray 1.9 A",
+  "evidence": "Protein-kinase phosphoryl transfer from the ATP gamma-phosphate to a substrate Ser/Thr hydroxyl; no hydrogen transferred from carbon",
+  "doi": "10.1021/jm960402a",
+  "notes": "DOI is the primary citation of the ATP/Mg complex.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "HUMAN CYCLIN-DEPENDENT KINASE 2",
+   "method": "X-ray",
+   "resolution": 1.9,
+   "ligands": [
+    "ATP",
+    "MG"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "High-Resolution Crystal Structures of Human Cyclin-Dependent Kinase 2 with and without ATP:  Bound Waters and Natural Ligand as Guides for Inhibitor Design",
+   "journal": "Journal of Medicinal Chemistry",
+   "year": 1996
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Endo-1,4-beta-xylanase (GH11)",
+  "organism": "Bacillus circulans",
+  "pdb": "1BCX",
+  "cofactor": "no cofactor (sulfate only), X-ray 1.81 A",
+  "evidence": "Retaining double-displacement glycoside hydrolysis via a covalent glycosyl-enzyme intermediate (trapped and structurally characterised in GH11); anomeric C-O chemistry without C-H cleavage",
+  "doi": "10.1021/bi982946f",
+  "notes": "Mechanism DOI = glycosyl-enzyme intermediate study in a family G/11 xylanase. Structure DOI 10.1002/pro.5560030312. UNSURE: this entry comes from a mutational/crystallographic active-site study, so confirm the deposited chain is wild type before freezing.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "MUTATIONAL AND CRYSTALLOGRAPHIC ANALYSES OF THE ACTIVE SITE RESIDUES OF THE BACILLUS CIRCULANS XYLANASE",
+   "method": "X-ray",
+   "resolution": 1.81,
+   "ligands": [
+    "SO4"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Sugar Ring Distortion in the Glycosyl-Enzyme Intermediate of a Family G/11 Xylanase\n                    <sup>,</sup>",
+   "journal": "Biochemistry",
+   "year": 1999
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Cellobiohydrolase Cel7A (CBH I) catalytic domain",
+  "organism": "Hypocrea jecorina (Trichoderma reesei)",
+  "pdb": "1CEL",
+  "cofactor": "no redox cofactor (glucose/cellobiose units, Ca, NAG), X-ray 1.8 A",
+  "evidence": "Retaining glycoside hydrolase: glycosylation/deglycosylation of the beta-1,4 glucosidic bond through an oxocarbenium-like transition state; no hydrogen transfer from carbon",
+  "doi": "10.1126/science.8036495",
+  "notes": "Wild-type catalytic core (DOI is the primary citation of this entry).",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "THE THREE-DIMENSIONAL CRYSTAL STRUCTURE OF THE CATALYTIC CORE OF CELLOBIOHYDROLASE I FROM TRICHODERMA REESEI",
+   "method": "X-ray",
+   "resolution": 1.8,
+   "ligands": [
+    "BGC",
+    "CA",
+    "GLC",
+    "IBZ",
+    "NAG"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "The Three-Dimensional Crystal Structure of the Catalytic Core of Cellobiohydrolase I from\n            <i>Trichoderma reesei</i>",
+   "journal": "Science",
+   "year": 1994
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Chitinase A (GH18)",
+  "organism": "Serratia marcescens",
+  "pdb": "1CTN",
+  "cofactor": "no cofactor, X-ray 2.3 A",
+  "evidence": "Substrate-assisted retaining glycoside hydrolysis via an oxazolinium intermediate; C-O bond chemistry only",
+  "doi": "10.1016/s0969-2126(94)00119-7",
+  "notes": "Structure and mechanism paper. QM/MM mechanism study of chitinase A: 10.1039/c9cp05163e.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "CRYSTAL STRUCTURE OF A BACTERIAL CHITINASE AT 2.3 ANGSTROMS RESOLUTION",
+   "method": "X-ray",
+   "resolution": 2.3,
+   "ligands": []
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Crystal structure of a bacterial chitinase at 2.3 Å resolution",
+   "journal": "Structure",
+   "year": 1994
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "HIV-1 protease",
+  "organism": "Human immunodeficiency virus 1",
+  "pdb": "1HSG",
+  "cofactor": "no cofactor (Asp25/Asp25' dyad) with indinavir bound, X-ray 2.0 A",
+  "evidence": "Aspartic protease: general acid/base-activated water attacks the peptide carbonyl carbon to give a gem-diol intermediate; amide hydrolysis without C-H transfer",
+  "doi": "10.1039/c9sc01464k",
+  "notes": "Mechanism DOI = QM/MM study of the HIV-1 protease hydrolysis reaction pathway. No RCSB-linked DOI for this structure entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "CRYSTAL STRUCTURE AT 1.9 ANGSTROMS RESOLUTION OF HUMAN IMMUNODEFICIENCY VIRUS (HIV) II PROTEASE COMPLEXED WITH L-735,524, AN ORALLY BIOAVAILABLE INHIBITOR OF THE HIV PROTEASES",
+   "method": "X-ray",
+   "resolution": 2.0,
+   "ligands": [
+    "MK1"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Conformational diversity induces nanosecond-timescale chemical disorder in the HIV-1 protease reaction pathway",
+   "journal": "Chemical Science",
+   "year": 2019
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Angiotensin-converting enzyme (ACE)",
+  "organism": "Homo sapiens",
+  "pdb": "1O86",
+  "cofactor": "catalytic Zn2+, Cl-, lisinopril bound, X-ray 2.0 A",
+  "evidence": "Zn-dependent carboxydipeptidase: Zn-activated water attacks the scissile amide carbonyl; amide hydrolysis without C-H cleavage",
+  "doi": "10.1038/nature01370",
+  "notes": "Structure and mechanism paper (Natesh et al.). Hard case: mononuclear Zn site, no redox chemistry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal Structure of Human Angiotensin Converting Enzyme in complex with lisinopril.",
+   "method": "X-ray",
+   "resolution": 2.0,
+   "ligands": [
+    "CL",
+    "GLY",
+    "LPR",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Crystal structure of the human angiotensin-converting enzyme–lisinopril complex",
+   "journal": "Nature",
+   "year": 2003
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Adenosine deaminase",
+  "organism": "Mus musculus",
+  "pdb": "2ADA",
+  "cofactor": "Zn2+ plus 6-hydroxyl-1,6-dihydropurine riboside (transition-state analogue), X-ray 2.4 A",
+  "evidence": "Zn-activated hydroxide adds to C6 of the purine ring with elimination of ammonia; the transition-state-analogue structure defines addition-elimination at carbon, with no hydrogen abstracted from carbon",
+  "doi": "10.1126/science.1925539",
+  "notes": "Structure with transition-state analogue defining the hydrolytic deamination mechanism.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "ATOMIC STRUCTURE OF ADENOSINE DEAMINASE COMPLEXED WITH A TRANSITION-STATE ANALOG: UNDERSTANDING CATALYSIS AND IMMUNODEFICIENCY MUTATIONS",
+   "method": "X-ray",
+   "resolution": 2.4,
+   "ligands": [
+    "HPR",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Atomic Structure of Adenosine Deaminase Complexed with a Transition-State Analog: Understanding Catalysis and Immunodeficiency Mutations",
+   "journal": "Science",
+   "year": 1991
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Cytidine deaminase",
+  "organism": "Escherichia coli",
+  "pdb": "1ALN",
+  "cofactor": "Zn2+ plus a dihydrouridine/cytidine-type ligand, X-ray 2.3 A",
+  "evidence": "Zn-hydroxide addition at C4 of the pyrimidine ring followed by elimination of ammonia; hydrolytic deamination without C-H transfer",
+  "doi": "10.1021/bi9525583",
+  "notes": "DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "CRYSTAL STRUCTURE OF CYTIDINE DEAMINASE COMPLEXED WITH 3-DEAZACYTIDINE",
+   "method": "X-ray",
+   "resolution": 2.3,
+   "ligands": [
+    "CTD",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Cytidine Deaminase Complexed to 3-Deazacytidine:  A “Valence Buffer” in Zinc Enzyme Catalysis",
+   "journal": "Biochemistry",
+   "year": 1996
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Arginase I",
+  "organism": "Rattus norvegicus",
+  "pdb": "1RLA",
+  "cofactor": "binuclear Mn2+ cluster, X-ray 2.1 A",
+  "evidence": "Binuclear-Mn metallohydrolase: metal-bridging hydroxide attacks the guanidinium carbon of arginine giving ornithine and urea; no redox chemistry and no C-H cleavage",
+  "doi": "10.1038/383554a0",
+  "notes": "Hard case: dinuclear Mn centre that performs no redox chemistry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "THREE-DIMENSIONAL STRUCTURE OF RAT LIVER ARGINASE, THE BINUCLEAR MANGANESE METALLOENZYME OF THE UREA CYCLE",
+   "method": "X-ray",
+   "resolution": 2.1,
+   "ligands": [
+    "MN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structure of a unique binuclear manganese cluster in arginase",
+   "journal": "Nature",
+   "year": 1996
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Phosphotriesterase (parathion hydrolase)",
+  "organism": "Brevundimonas diminuta",
+  "pdb": "1HZY",
+  "cofactor": "binuclear Zn2+, X-ray 1.3 A",
+  "evidence": "Binuclear-metal-activated hydroxide attacks phosphorus of organophosphate triesters in line; P-O bond cleavage only",
+  "doi": "10.1021/bi002661e",
+  "notes": "DOI is the primary citation of this wild-type Zn-containing structure. Hard case: dinuclear metal centre, non-redox.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "HIGH RESOLUTION STRUCTURE OF THE ZINC-CONTAINING PHOSPHOTRIESTERASE FROM PSEUDOMONAS DIMINUTA",
+   "method": "X-ray",
+   "resolution": 1.3,
+   "ligands": [
+    "EDO",
+    "FMT",
+    "NA",
+    "PEL",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "High Resolution X-ray Structures of Different Metal-Substituted Forms of Phosphotriesterase from <i>Pseudomonas diminuta</i><sup>,</sup>",
+   "journal": "Biochemistry",
+   "year": 2001
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Staphylococcal nuclease (thermonuclease)",
+  "organism": "Staphylococcus aureus",
+  "pdb": "1SNC",
+  "cofactor": "Ca2+ plus thymidine-3',5'-bisphosphate, X-ray 1.65 A",
+  "evidence": "Ca2+-assisted hydrolysis of the phosphodiester backbone by an activated water, as derived from the enzyme-pdTp-Ca2+ complex; no C-H transfer",
+  "doi": "10.1073/pnas.76.6.2551",
+  "notes": "Mechanism DOI = the classic pdTp/Ca2+ complex mechanism paper, same ternary ligand set as this structure (structure DOI 10.1002/prot.340050302).",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "THE CRYSTAL STRUCTURE OF THE TERNARY COMPLEX OF STAPHYLOCOCCAL NUCLEASE, CA2+, AND THE INHIBITOR PD*TP, REFINED AT 1.65 ANGSTROMS",
+   "method": "X-ray",
+   "resolution": 1.65,
+   "ligands": [
+    "CA",
+    "THP"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Staphylococcal nuclease: Proposed mechanism of action based on structure of enzyme—thymidine 3′,5′-bisphosphate—calcium ion complex at 1.5-Å resolution",
+   "journal": "Proceedings of the National Academy of Sciences",
+   "year": 1979
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Peptide deformylase (PDF / Def)",
+  "organism": "Escherichia coli",
+  "pdb": "1BSZ",
+  "cofactor": "mononuclear Fe2+, X-ray 1.9 A",
+  "evidence": "Fe2+-dependent amide hydrolysis removing the N-formyl group of nascent polypeptides; the iron is purely Lewis-acidic, performs no redox chemistry, and no C-H bond is cleaved",
+  "doi": "10.1038/4162",
+  "notes": "Deliberate hard case: a ferrous-iron enzyme that looks redox-active but is a hydrolase. Zn-substituted form of the same enzyme: 1BS5.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "PEPTIDE DEFORMYLASE AS FE2+ CONTAINING FORM (NATIVE) IN COMPLEX WITH INHIBITOR POLYETHYLENE GLYCOL",
+   "method": "X-ray",
+   "resolution": 1.9,
+   "ligands": [
+    "2PE",
+    "FE",
+    "SO4"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Iron center, substrate recognition and mechanism of peptide deformylase",
+   "journal": "Nature Structural Biology",
+   "year": 1998
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Nitrile hydratase (Co-type)",
+  "organism": "Pseudonocardia thermophila JCM 3095",
+  "pdb": "1IRE",
+  "cofactor": "non-corrinoid Co3+ with oxidised cysteine-sulfinic/sulfenic ligands, X-ray 1.8 A",
+  "evidence": "Metal-assisted hydration of a nitrile to the amide; the low-spin Co(III) centre remains in one oxidation state through turnover and no hydrogen is transferred from carbon",
+  "doi": "10.1006/bbrc.2001.5897",
+  "notes": "Hard case: thiolate-ligated Co centre with redox-looking spectroscopy but non-redox catalysis. EPR intermediate study: 10.1021/acs.biochem.1c00574.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal Structure of Co-type nitrile hydratase from Pseudonocardia thermophila",
+   "method": "X-ray",
+   "resolution": 1.8,
+   "ligands": [
+    "CO"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Crystal Structure of Cobalt-Containing Nitrile Hydratase",
+   "journal": "Biochemical and Biophysical Research Communications",
+   "year": 2001
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Protein farnesyltransferase",
+  "organism": "Rattus norvegicus",
+  "pdb": "1FT2",
+  "cofactor": "Zn2+ plus farnesyl diphosphate, X-ray 3.4 A",
+  "evidence": "Zn-thiolate-assisted prenyl transfer to a cysteine thiol; the measured alpha-secondary KIE indicates an electrophilic, dissociative substitution at C1 with no primary hydrogen transfer from carbon",
+  "doi": "10.1021/ja065838m",
+  "notes": "Mechanism DOI = alpha-secondary KIE measurement for mammalian FTase (no primary KIE). Structure DOI 10.1021/bi980708e.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "CO-CRYSTAL STRUCTURE OF PROTEIN FARNESYLTRANSFERASE COMPLEXED WITH A FARNESYL DIPHOSPHATE SUBSTRATE",
+   "method": "X-ray",
+   "resolution": 3.4,
+   "ligands": [
+    "FPP",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Measurement of the α-Secondary Kinetic Isotope Effect for the Reaction Catalyzed by Mammalian Protein Farnesyltransferase",
+   "journal": "Journal of the American Chemical Society",
+   "year": 2006
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Methionine aminopeptidase (MetAP I)",
+  "organism": "Escherichia coli",
+  "pdb": "1MAT",
+  "cofactor": "binuclear Co2+, X-ray 1.9 A",
+  "evidence": "Dinuclear-metal aminopeptidase: metal-bridging water/hydroxide attacks the scissile peptide carbonyl; amide hydrolysis without C-H chemistry",
+  "doi": "10.1021/bi00066a009",
+  "notes": "Hard case: dinuclear Co centre, non-redox. DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": null,
+  "doi_ok": true,
+  "doi_info": null,
+  "pdb_already_used": false,
+  "replaced_pdb": "2MAT",
+  "freeze_note": "Wild type replaces 2MAT (R175Q)."
+ },
+ {
+  "label": "K",
+  "name": "Histone deacetylase 8 (HDAC8)",
+  "organism": "Homo sapiens",
+  "pdb": "1T69",
+  "cofactor": "catalytic Zn2+ with SAHA (hydroxamate) bound, X-ray 2.91 A",
+  "evidence": "Zn-dependent hydrolysis of the acetamide bond of acetyl-lysine via a tetrahedral intermediate; no hydrogen transfer from carbon",
+  "doi": "10.1016/j.str.2004.04.012",
+  "notes": "Wild-type HDAC8-SAHA complex; DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal Structure of human HDAC8 complexed with SAHA",
+   "method": "X-ray",
+   "resolution": 2.91,
+   "ligands": [
+    "SHH",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structural Snapshots of Human HDAC8 Provide Insights into the Class I Histone Deacetylases",
+   "journal": "Structure",
+   "year": 2004
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Purine nucleoside phosphorylase (PNP)",
+  "organism": "Bos taurus",
+  "pdb": "3PNP",
+  "cofactor": "phosphate (and Mg from crystallisation), X-ray 1.6 A",
+  "evidence": "Phosphorolysis of the N-ribosidic bond through a ribooxocarbenium-ion-like transition state mapped by heavy-atom and secondary KIEs; chemistry is at C1' with no hydrogen transferred from carbon",
+  "doi": "10.1021/bi7021365",
+  "notes": "Mechanism DOI = transition-state structure analysis of bovine PNP. No RCSB-linked DOI for this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "THE HIGH RESOLUTION CRYSTAL STRUCTURE OF BOVINE SPLEEN PURINE NUCLEOSIDE PHOSPHORYLASE IN COMPLEX FORMS WITH PHOSPHATE AND 9-DEAZAINOSINE",
+   "method": "X-ray",
+   "resolution": 1.6,
+   "ligands": [
+    "MG",
+    "PO4"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Second-Sphere Amino Acids Contribute to Transition-State Structure in Bovine Purine Nucleoside Phosphorylase",
+   "journal": "Biochemistry",
+   "year": 2008
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Phosphoglucomutase (PGM1)",
+  "organism": "Oryctolagus cuniculus",
+  "pdb": "3PMG",
+  "cofactor": "Mg2+, X-ray 2.4 A",
+  "evidence": "Mg2+-dependent intramolecular phosphoryl transfer via a phosphoserine enzyme intermediate and glucose-1,6-bisphosphate; P-O chemistry only",
+  "doi": "10.1107/S0907444997000875",
+  "notes": "DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "STRUCTURE OF RABBIT MUSCLE PHOSPHOGLUCOMUTASE AT 2.4 ANGSTROMS RESOLUTION. USE OF FREEZING POINT DEPRESSANT AND REDUCED TEMPERATURE TO ENHANCE DIFFRACTIVITY",
+   "method": "X-ray",
+   "resolution": 2.4,
+   "ligands": [
+    "MG"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structure of Rabbit Muscle Phosphoglucomutase Refined at 2.4 Å Resolution",
+   "journal": "Acta Crystallographica Section D Biological Crystallography",
+   "year": 1997
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "H-Ras (p21 GTPase)",
+  "organism": "Homo sapiens",
+  "pdb": "5P21",
+  "cofactor": "GppNHp (GTP analogue) + Mg2+, X-ray 1.35 A",
+  "evidence": "Mg2+-assisted hydrolysis of the GTP gamma-phosphate by an in-line water; substrate-assisted phosphoryl chemistry only, no C-H cleavage",
+  "doi": "10.1016/j.jmb.2004.06.007",
+  "notes": "Mechanism DOI = GTP hydrolysis mechanism of Ras-like GTPases. No RCSB-linked DOI for this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "REFINED CRYSTAL STRUCTURE OF THE TRIPHOSPHATE CONFORMATION OF H-RAS P21 AT 1.35 ANGSTROMS RESOLUTION: IMPLICATIONS FOR THE MECHANISM OF GTP HYDROLYSIS",
+   "method": "X-ray",
+   "resolution": 1.35,
+   "ligands": [
+    "GNP",
+    "MG"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "GTP Hydrolysis Mechanism of Ras-like GTPases",
+   "journal": "Journal of Molecular Biology",
+   "year": 2004
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "M.HhaI DNA cytosine-C5 methyltransferase",
+  "organism": "Haemophilus haemolyticus",
+  "pdb": "2HMY",
+  "cofactor": "S-adenosyl-L-methionine (SAM), X-ray 2.61 A",
+  "evidence": "Covalent-addition methyl transfer: Cys81 adds to cytosine C6 and the activated C5 attacks the SAM methyl group in an SN2 at the methyl carbon; the C5 hydrogen leaves as a proton to a base",
+  "doi": "10.1006/jmbi.1999.2608",
+  "notes": "UNSURE: a C5-H is lost as a proton during rearomatisation, so this is a borderline K; retain only if proton release (not hydride or H-atom transfer) counts as classical.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "BINARY COMPLEX OF HHAI METHYLTRANSFERASE WITH ADOMET FORMED IN THE PRESENCE OF A SHORT NONPSECIFIC DNA OLIGONUCLEOTIDE",
+   "method": "X-ray",
+   "resolution": 2.61,
+   "ligands": [
+    "SAM"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structure of a binary complex of Hha I methyltransferase with S -adnosyl- l -methionine formed in the presence of a short non-specific DNA oligonucleotide 1 1Edited by J. Karn",
+   "journal": "Journal of Molecular Biology",
+   "year": 1999
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "L-Asparaginase II",
+  "organism": "Escherichia coli K-12",
+  "pdb": "3ECA",
+  "cofactor": "no cofactor (Thr nucleophile), L-aspartate bound, X-ray 2.4 A",
+  "evidence": "Threonine-nucleophile amidohydrolase acting by double displacement through an acyl-enzyme intermediate; amide hydrolysis with no C-H transfer",
+  "doi": "10.1021/acs.biochem.0c00116",
+  "notes": "The mechanism paper (Mechanism of Catalysis by L-Asparaginase) applies to this enzyme; the structure entry is the wild-type E. coli enzyme (structure DOI 10.1073/pnas.90.4.1474).",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "CRYSTAL STRUCTURE OF ESCHERICHIA COLI L-ASPARAGINASE, AN ENZYME USED IN CANCER THERAPY (ELSPAR)",
+   "method": "X-ray",
+   "resolution": 2.4,
+   "ligands": [
+    "ASP"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Mechanism of Catalysis by <scp>l</scp>-Asparaginase",
+   "journal": "Biochemistry",
+   "year": 2020
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Dihydroorotase",
+  "organism": "Escherichia coli",
+  "pdb": "1XGE",
+  "cofactor": "binuclear Zn2+ with dihydroorotate/carbamoyl aspartate, X-ray 1.9 A",
+  "evidence": "Binuclear-Zn amidohydrolase catalysing reversible cyclisation/hydrolysis of the amide bond of carbamoyl aspartate; no hydrogen transfer from carbon",
+  "doi": "10.1016/j.jmb.2005.01.067",
+  "notes": "Hard case: dinuclear Zn centre, non-redox. DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Dihydroorotase from Escherichia coli: Loop Movement and Cooperativity between subunits",
+   "method": "X-ray",
+   "resolution": 1.9,
+   "ligands": [
+    "DOR",
+    "NCD",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Dihydroorotase from Escherichia coli: Loop Movement and Cooperativity between Subunits",
+   "journal": "Journal of Molecular Biology",
+   "year": 2005
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Glutamate carboxypeptidase II (PSMA / NAALADase)",
+  "organism": "Homo sapiens",
+  "pdb": "2OOT",
+  "cofactor": "binuclear Zn2+, Ca2+, Cl-, X-ray 1.64 A",
+  "evidence": "Dinuclear-Zn metallopeptidase hydrolysing the amide bond of N-acetyl-aspartyl-glutamate; no C-H chemistry",
+  "doi": "10.1107/S174430910700379X",
+  "notes": "DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "A High Resolution Structure of Ligand-free Human Glutamate Carboxypeptidase II",
+   "method": "X-ray",
+   "resolution": 1.64,
+   "ligands": [
+    "CA",
+    "CL",
+    "NAG",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "A high-resolution structure of ligand-free human glutamate carboxypeptidase II",
+   "journal": "Acta Crystallographica Section F Structural Biology and Crystallization Communications",
+   "year": 2007
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Phosphatidylcholine-preferring phospholipase C (PLC-Bc)",
+  "organism": "Bacillus cereus",
+  "pdb": "1AH7",
+  "cofactor": "three Zn2+ ions, X-ray 1.50 A",
+  "evidence": "Trinuclear-Zn phosphodiesterase: metal-activated water attacks the phosphodiester phosphorus; P-O chemistry only",
+  "doi": "10.1038/338357a0",
+  "notes": "Hard case: trinuclear Zn cluster, non-redox. DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "PHOSPHOLIPASE C FROM BACILLUS CEREUS",
+   "method": "X-ray",
+   "resolution": 1.501,
+   "ligands": [
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "High-resolution (1.5 Å) crystal structure of phospholipase C from Bacillus cereus",
+   "journal": "Nature",
+   "year": 1989
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Leucine aminopeptidase (bovine lens LAP)",
+  "organism": "Bos taurus",
+  "pdb": "1LAM",
+  "cofactor": "binuclear Zn2+ (plus carbonate), X-ray 1.6 A",
+  "evidence": "Dinuclear-Zn exopeptidase: bridging hydroxide attacks the scissile carbonyl; amide hydrolysis without C-H cleavage",
+  "doi": "10.1021/bi00045a021",
+  "notes": "Hard case: dinuclear Zn centre, non-redox. Leu-bound form of the same enzyme: 1LAN.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "LEUCINE AMINOPEPTIDASE (UNLIGATED)",
+   "method": "X-ray",
+   "resolution": 1.6,
+   "ligands": [
+    "CO3",
+    "MRD",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Two-Metal Ion Mechanism of Bovine Lens Leucine Aminopeptidase: Active Site Solvent Structure and Binding Mode of L-Leucinal, a gem-Diolate Transition State Analog, by X-ray Crystallography",
+   "journal": "Biochemistry",
+   "year": 1995
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "K",
+  "name": "Cutinase",
+  "organism": "Nectria haematococca mpVI (Fusarium solani)",
+  "pdb": "1CUS",
+  "cofactor": "no cofactor (Ser-His-Asp triad), X-ray 1.25 A",
+  "evidence": "Serine-hydrolase ester cleavage via an acyl-enzyme intermediate; no hydrogen transfer from carbon",
+  "doi": "10.1038/356615a0",
+  "notes": "DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "FUSARIUM SOLANI CUTINASE IS A LIPOLYTIC ENZYME WITH A CATALYTIC SERINE ACCESSIBLE TO SOLVENT",
+   "method": "X-ray",
+   "resolution": 1.25,
+   "ligands": []
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Fusarium solani cutinase is a lipolytic enzyme with a catalytic serine accessible to solvent",
+   "journal": "Nature",
+   "year": 1992
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Amicyanin",
+  "organism": "Paracoccus denitrificans",
+  "pdb": "1AAC",
+  "cofactor": "type-1 Cu (His/Cys/His/Met), X-ray 1.31 A",
+  "evidence": "Soluble blue-copper (cupredoxin) electron carrier shuttling electrons from methylamine dehydrogenase to c-type cytochromes; no substrate turnover and no C-H cleavage",
+  "doi": "10.1107/S0907444996001072",
+  "notes": "Pure electron-transfer protein with a redox-active Cu site.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "AMICYANIN OXIDIZED, 1.31 ANGSTROMS",
+   "method": "X-ray",
+   "resolution": 1.31,
+   "ligands": [
+    "CU"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "X-ray Structure of the Cupredoxin Amicyanin, from<i>Paracoccus denitrificans</i>, Refined at 1.31 Å Resolution",
+   "journal": "Acta Crystallographica Section D Biological Crystallography",
+   "year": 1996
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Pseudoazurin",
+  "organism": "Alcaligenes faecalis S-6",
+  "pdb": "1PZB",
+  "cofactor": "type-1 Cu, X-ray 1.8 A",
+  "evidence": "Cupredoxin electron donor to nitrite reductase; electron transfer only",
+  "doi": "10.1016/0014-5793(94)00544-3",
+  "notes": "Entry 1PAZ is the same protein without an RCSB-linked DOI.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "THE CRYSTAL STRUCTURES OF REDUCED PSEUDOAZURIN FROM ALCALIGENES FAECALIS S-6 AT TWO PH VALUES",
+   "method": "X-ray",
+   "resolution": 1.8,
+   "ligands": [
+    "CU"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "The crystal structures of reduced pseudoazurin from <i>Alcaligenes faecalis</i> S‐6 at two pH values",
+   "journal": "FEBS Letters",
+   "year": 1994
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Rusticyanin",
+  "organism": "Acidithiobacillus (Thiobacillus) ferrooxidans",
+  "pdb": "1RCY",
+  "cofactor": "type-1 Cu, X-ray 1.9 A",
+  "evidence": "Acid-stable, high-potential cupredoxin acting as a periplasmic electron carrier in iron respiration; no substrate chemistry",
+  "doi": "10.1006/jmbi.1996.0612",
+  "notes": "",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "RUSTICYANIN (RC) FROM THIOBACILLUS FERROOXIDANS",
+   "method": "X-ray",
+   "resolution": 1.9,
+   "ligands": [
+    "CU"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Multiple Wavelength Anomalous Diffraction (MAD) Crystal Structure of Rusticyanin: a Highly Oxidizing Cupredoxin with Extreme Acid Stability",
+   "journal": "Journal of Molecular Biology",
+   "year": 1996
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Stellacyanin (phytocyanin)",
+  "organism": "Cucumis sativus",
+  "pdb": "1JER",
+  "cofactor": "type-1 Cu with Gln axial ligand, X-ray 1.6 A",
+  "evidence": "Plant cupredoxin/phytocyanin with electron-transfer function and no known catalytic activity",
+  "doi": "10.1002/pro.5560051104",
+  "notes": "",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "CUCUMBER STELLACYANIN, CU2+, PH 7.0",
+   "method": "X-ray",
+   "resolution": 1.6,
+   "ligands": [
+    "CU"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "A missing link in cupredoxins: Crystal structure of cucumber stellacyanin at 1.6 Å resolution",
+   "journal": "Protein Science",
+   "year": 1996
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Nitrosocyanin",
+  "organism": "Nitrosomonas europaea",
+  "pdb": "1IBY",
+  "cofactor": "mononuclear red Cu (3 His, Cys, water), X-ray 1.65 A",
+  "evidence": "Red copper protein with a cupredoxin fold, characterised as an electron-transfer/novel Cu-site protein and not a C-H-cleaving catalyst",
+  "doi": "10.1021/bi0102611",
+  "notes": "UNSURE: the physiological function of nitrosocyanin is not firmly established; keep only if 'no catalytic C-H cleavage' suffices for a control.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "RED COPPER PROTEIN NITROSOCYANIN FROM NITROSOMONAS EUROPAEA",
+   "method": "X-ray",
+   "resolution": 1.65,
+   "ligands": [
+    "CU",
+    "HEZ"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Crystal Structure of a Novel Red Copper Protein from <i>Nitrosomonas europaea</i><sup>,</sup>",
+   "journal": "Biochemistry",
+   "year": 2001
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "CopC (copper-resistance protein C)",
+  "organism": "Pseudomonas syringae pv. tomato",
+  "pdb": "2C9Q",
+  "cofactor": "Cu bound (distinct Cu(I) and Cu(II) sites), X-ray 1.6 A",
+  "evidence": "Periplasmic copper-handling/copper-resistance protein that binds and transfers Cu ions; no catalytic chemistry",
+  "doi": "10.1021/ja058528x",
+  "notes": "Metal-binding/transport control.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Cu(I)Cu(II)-CopC at pH 7.5",
+   "method": "X-ray",
+   "resolution": 1.6,
+   "ligands": [
+    "CU"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Intermolecular Transfer of Copper Ions from the CopC Protein of <i>Pseudomonas syringae</i>. Crystal Structures of Fully Loaded Cu<sup>I</sup>Cu<sup>II</sup> Forms",
+   "journal": "Journal of the American Chemical Society",
+   "year": 2006
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Phototropin 1 LOV2 domain",
+  "organism": "Avena sativa",
+  "pdb": "2V0W",
+  "cofactor": "FMN, X-ray 1.7 A",
+  "evidence": "Blue-light photoreceptor domain in which FMN-cysteinyl adduct photochemistry drives a conformational signal; the flavin is a photosensor, not a catalyst, and no C-H bond is cleaved",
+  "doi": "10.1021/bi701543e",
+  "notes": "Flavin-binding photoreceptor control.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "N- and C-terminal helices of oat LOV2 (404-546) are involved in light- induced signal transduction (cryo-trapped light structure of LOV2 (404-546))",
+   "method": "X-ray",
+   "resolution": 1.7,
+   "ligands": [
+    "FMN",
+    "GOL"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "N- and C-Terminal Flanking Regions Modulate Light-Induced Signal Transduction in the LOV2 Domain of the Blue Light Sensor Phototropin 1 from\n                    <i>Avena sativa</i>\n                    <sup>,</sup>",
+   "journal": "Biochemistry",
+   "year": 2007
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "VIVID (VVD) LOV photoreceptor",
+  "organism": "Neurospora crassa",
+  "pdb": "2PD7",
+  "cofactor": "FAD, X-ray 2.0 A",
+  "evidence": "Fungal blue-light photoreceptor of the LOV/PAS class; light-driven flavin-cysteinyl adduct formation and dimerisation without substrate turnover",
+  "doi": "10.1126/science.1137128",
+  "notes": "Wild-type VVD; DOI is the primary citation of this entry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "2.0 Angstrom Crystal Structure of the Fungal Blue-Light Photoreceptor Vivid",
+   "method": "X-ray",
+   "resolution": 2.0,
+   "ligands": [
+    "FAD"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Conformational Switching in the Fungal Light Sensor Vivid",
+   "journal": "Science",
+   "year": 2007
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "BLUF-domain blue-light receptor BlrB",
+  "organism": "Rhodobacter sphaeroides",
+  "pdb": "2BYC",
+  "cofactor": "FMN, X-ray 1.9 A",
+  "evidence": "BLUF-family blue-light sensor in which the photoexcited flavin triggers a hydrogen-bond rearrangement for signalling; no catalysis",
+  "doi": "10.1073/pnas.0500722102",
+  "notes": "",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "BlrB - a BLUF protein, dark state structure",
+   "method": "X-ray",
+   "resolution": 1.9,
+   "ligands": [
+    "FMN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structure of a bacterial BLUF photoreceptor: Insights into blue light-mediated signal transduction",
+   "journal": "Proceedings of the National Academy of Sciences",
+   "year": 2005
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Dodecin",
+  "organism": "Halobacterium salinarum",
+  "pdb": "1MOG",
+  "cofactor": "riboflavin bound at subunit interfaces, X-ray 1.7 A",
+  "evidence": "Dodecameric flavin-storage/binding protein that sequesters riboflavin and has no catalytic activity",
+  "doi": "10.1016/s0969-2126(03)00048-0",
+  "notes": "Flavin-binding storage control.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal structure of H. salinarum dodecin",
+   "method": "X-ray",
+   "resolution": 1.7,
+   "ligands": [
+    "CL",
+    "MG",
+    "NA",
+    "RBF"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Crystal Structure of Halophilic Dodecin",
+   "journal": "Structure",
+   "year": 2003
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Dps-like iron-storage protein",
+  "organism": "Sulfolobus solfataricus",
+  "pdb": "2CLB",
+  "cofactor": "di-iron ferroxidase site (Fe and Zn in this structure), X-ray 2.4 A",
+  "evidence": "Dps-family iron-storage and detoxification protein that binds and mineralises iron and protects DNA from oxidative damage; no C-H chemistry",
+  "doi": "10.1021/bi060782u",
+  "notes": "Iron-storage control from a family distinct from ferritin/bacterioferritin.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "The structure of the DPS-like protein from Sulfolobus solfataricus reveals a bacterioferritin-like di-metal binding site within a Dps- like dodecameric assembly",
+   "method": "X-ray",
+   "resolution": 2.4,
+   "ligands": [
+    "FE",
+    "ZN"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Structure of the DPS-Like Protein from <i>Sulfolobus solfataricus</i> Reveals a Bacterioferritin-Like Dimetal Binding Site within a DPS-Like Dodecameric Assembly<sup>,</sup>",
+   "journal": "Biochemistry",
+   "year": 2006
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "MitoNEET (CISD1)",
+  "organism": "Homo sapiens",
+  "pdb": "2QH7",
+  "cofactor": "[2Fe-2S] cluster with 3 Cys and 1 His ligation, X-ray 1.5 A",
+  "evidence": "Outer-mitochondrial-membrane CDGSH iron-sulfur protein involved in cluster/electron transfer and iron homeostasis; no substrate catalysis",
+  "doi": "10.1073/pnas.0707189104",
+  "notes": "Fe-S control from a family outside ferredoxins, HiPIP, Rieske and rubredoxin.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "MitoNEET is a uniquely folded 2Fe-2S outer mitochondrial membrane protein stabilized by pioglitazone",
+   "method": "X-ray",
+   "resolution": 1.5,
+   "ligands": [
+    "FES"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "MitoNEET is a uniquely folded 2Fe–2S outer mitochondrial membrane protein stabilized by pioglitazone",
+   "journal": "Proceedings of the National Academy of Sciences",
+   "year": 2007
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "FhuD ferrichrome-binding periplasmic protein",
+  "organism": "Escherichia coli",
+  "pdb": "1K7S",
+  "cofactor": "bound hydroxamate siderophore (albomycin-type ligand), X-ray 2.6 A",
+  "evidence": "Periplasmic binding protein of the ferrichrome ABC transport system binding Fe(III)-siderophores for uptake; no redox or C-H chemistry",
+  "doi": "10.1074/jbc.M109385200",
+  "notes": "Siderophore/iron-transport control.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "FhuD complexed with albomycin-delta 2",
+   "method": "X-ray",
+   "resolution": 2.6,
+   "ligands": [
+    "ALB"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "X-ray Crystallographic Structures of the Escherichia coli Periplasmic Protein FhuD Bound to Hydroxamate-type Siderophores and the Antibiotic Albomycin",
+   "journal": "Journal of Biological Chemistry",
+   "year": 2002
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "Hemopexin",
+  "organism": "Oryctolagus cuniculus",
+  "pdb": "1QHU",
+  "cofactor": "heme b, X-ray 2.3 A",
+  "evidence": "Plasma heme-transport and scavenging protein that binds free heme for receptor-mediated clearance; no catalytic activity",
+  "doi": "10.1038/13294",
+  "notes": "Heme-binding transport control.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "MAMMALIAN BLOOD SERUM HAEMOPEXIN DEGLYCOSYLATED AND IN COMPLEX WITH ITS LIGAND HAEM",
+   "method": "X-ray",
+   "resolution": 2.3,
+   "ligands": [
+    "CL",
+    "HEM",
+    "NA",
+    "PO4"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "",
+   "journal": "Nature Structural Biology",
+   "year": 1999
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "IsdE heme-binding lipoprotein",
+  "organism": "Staphylococcus aureus",
+  "pdb": "2Q8P",
+  "cofactor": "heme b, X-ray 1.95 A",
+  "evidence": "Substrate-binding lipoprotein of the IsdDEF heme ABC transporter that binds and relays heme for iron acquisition; no catalysis",
+  "doi": "10.1074/jbc.M704602200",
+  "notes": "",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "Crystal Structure of selenomethionine labelled S. aureus IsdE complexed with heme",
+   "method": "X-ray",
+   "resolution": 1.95,
+   "ligands": [
+    "HEM"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Heme Coordination by Staphylococcus aureus IsdE",
+   "journal": "Journal of Biological Chemistry",
+   "year": 2007
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "CooA (CO-sensing transcription factor)",
+  "organism": "Rhodospirillum rubrum",
+  "pdb": "1FT9",
+  "cofactor": "heme b, X-ray 2.6 A",
+  "evidence": "Heme-based CO sensor and CRP-family transcriptional activator; the heme is a gas-sensing site and the protein performs no redox catalysis",
+  "doi": "10.1038/82820",
+  "notes": "Heme sensor control.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "STRUCTURE OF THE REDUCED (FEII) CO-SENSING PROTEIN FROM R. RUBRUM",
+   "method": "X-ray",
+   "resolution": 2.6,
+   "ligands": [
+    "HEM"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "",
+   "journal": "Nature Structural Biology",
+   "year": 2000
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "BtuF vitamin B12-binding periplasmic protein",
+  "organism": "Escherichia coli",
+  "pdb": "1N4A",
+  "cofactor": "cyanocobalamin, X-ray 2.0 A",
+  "evidence": "Periplasmic binding protein of the BtuCD cobalamin ABC transporter; the corrinoid is transported cargo, not a catalytic cofactor",
+  "doi": "10.1074/jbc.M212239200",
+  "notes": "Deliberate hard case: a B12-binding protein that performs no B12 radical chemistry.",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "The Ligand Bound Structure of E.coli BtuF, the Periplasmic Binding Protein for Vitamin B12",
+   "method": "X-ray",
+   "resolution": 2.0,
+   "ligands": [
+    "CNC"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Crystal Structures of the BtuF Periplasmic-binding Protein for Vitamin B12 Suggest a Functionally Important Reduction in Protein Mobility upon Ligand Binding",
+   "journal": "Journal of Biological Chemistry",
+   "year": 2003
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "CeuE ferric-siderophore-binding periplasmic protein",
+  "organism": "Campylobacter jejuni",
+  "pdb": "5ADW",
+  "cofactor": "Fe3+ with a bidentate catecholate/hydroxamate siderophore unit, X-ray 1.9 A",
+  "evidence": "Periplasmic binding protein for ferric-siderophore uptake that binds Fe(III) complexes for transport; no catalytic turnover",
+  "doi": "10.1073/pnas.1520829113",
+  "notes": "",
+  "pdb_ok": true,
+  "pdb_info": {
+   "title": "The Periplasmic Binding Protein CeuE of Campylobacter jejuni preferentially binds the iron(III) complex of the Linear Dimer Component of Enterobactin",
+   "method": "X-ray",
+   "resolution": 1.9,
+   "ligands": [
+    "DMS",
+    "EHS",
+    "FE"
+   ]
+  },
+  "doi_ok": true,
+  "doi_info": {
+   "title": "Bacteria in an intense competition for iron: Key component of the\n                    <i>Campylobacter jejuni</i>\n                    iron uptake system scavenges enterobactin hydrolysis product",
+   "journal": "Proceedings of the National Academy of Sciences",
+   "year": 2016
+  },
+  "pdb_already_used": false
+ },
+ {
+  "label": "C",
+  "name": "HmuT heme-binding periplasmic protein",
+  "organism": "Corynebacterium glutamicum ATCC 13032",
+  "pdb": "3NU1",
+  "cofactor": "heme b, X-ray 1.65 A (Y240A variant)",
+  "evidence": "Substrate-binding protein of the HmuTUV heme ABC transporter that binds heme for iron acquisition; no catalysis",
+  "doi": "10.1016/j.jmb.2010.09.005",
+  "notes": "NOTE: this entry is the Y240A variant from the cited mutant study; wild-type entry 5AZ3 exists but has no RCSB-linked publication DOI.",
+  "pdb_ok": true,
+  "pdb_info": null,
+  "doi_ok": true,
+  "doi_info": null,
+  "pdb_already_used": false,
+  "replaced_pdb": "5B50",
+  "freeze_note": "Wild type Y. pestis HmuT replaces 5B50 (C. glutamicum Y240A)."
+ }
+]

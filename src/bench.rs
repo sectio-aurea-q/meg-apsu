@@ -26,13 +26,14 @@ enum Evidence { Stark, Unsicher, Ausgeschlossen }
 
 fn evidence(c: &Case) -> Evidence {
     match c.label {
-        Label::Control => Evidence::Stark,
-        Label::Classical => match c.name { "TIM" | "CA-II" => Evidence::Unsicher, _ => Evidence::Stark },
+        Label::Control => match c.name { "Nitrosocyanin" => Evidence::Unsicher, _ => Evidence::Stark },
+        Label::Classical => match c.name { "TIM" | "CA-II" | "M.HhaI" => Evidence::Unsicher, _ => Evidence::Stark },
         Label::Tunneling => match c.name {
             "RNR" | "COMT" => Evidence::Ausgeschlossen,
             "GluMut" => Evidence::Stark,
             "DiolDH" => Evidence::Unsicher,
             "DHFR" | "TS" | "LADH" | "TMADH" | "PETNR" | "MR" => Evidence::Stark,
+            "AAO" | "NAD-ME" => Evidence::Stark, // v1.5: T-Abhängigkeit bzw. Swain-Schaad (Regel oben)
             _ if c.kie >= 10.0 => Evidence::Stark,
             _ => Evidence::Unsicher,
         },
@@ -110,6 +111,74 @@ fn test14_set() -> Vec<Case> { vec![
     Case{name:"Rieske",     pdb:"1RIE", kie:1.0,  label:Label::Control},
     Case{name:"H-NOX",      pdb:"1U55", kie:1.0,  label:Label::Control},
     Case{name:"FixL",       pdb:"1DRM", kie:1.0,  label:Label::Control},
+]}
+
+// ═══ TEST-SET v1.5 — eingefroren 19.10.2026, VOR jeder Modelländerung ═══
+// Neue PDB-IDs (keine aus DEV/TEST/TEST14). Jede Struktur bei RCSB geprüft,
+// jede DOI bei Crossref aufgelöst (apsu/test15_verified.json). Wildtyp; Ausnahmen
+// nur SeMet/Expressions-Tag/natürliche Sequenzkonflikte.
+// Hauptergebnis: Auswertung „nur starke Labels“. Unsichere laufen mit, zählen dort nicht.
+// kie = gemessener KIE (Literatur), 0.0 = Tunnelbeleg ohne Einzelzahl. Für v2.0 (KIE-Vorhersage).
+// Befund beim Kuratieren: Unter den strengen Kriterien sind fast alle bekannten
+// H-Tunnel-Enzyme mit Kristallstruktur bereits in DEV/TEST/TEST14 → nur 6 neue Positive.
+fn test15_set() -> Vec<Case> { vec![
+    // Tunneling
+    Case{name:"DbM",          pdb:"4ZEL", kie:10.9, label:Label::Tunneling}, // Cu; 10.1021/bi00282a011 (Rind, Struktur human)
+    Case{name:"AAO",          pdb:"5OC1", kie:6.0,  label:Label::Tunneling}, // FAD; T-abh. KIE 10.1039/c7cp05904c; KIE≈6 10.1002/cbic.201100709
+    Case{name:"TSOX",         pdb:"1X31", kie:19.0, label:Label::Tunneling}, // FAD/FMN; 10.1093/jb/mvs045
+    Case{name:"NAD-ME",       pdb:"1LLQ", kie:0.0,  label:Label::Tunneling}, // NAD; >semiklass., Swain-Schaad 10.1021/bi00010a015
+    Case{name:"OleT",         pdb:"4L40", kie:0.0,  label:Label::Tunneling}, // Häm; unsicher, v. a. Theorie 10.1021/acs.jpcb.1c10280
+    Case{name:"FNR",          pdb:"1QUE", kie:0.0,  label:Label::Tunneling}, // FAD; unsicher, A_H/A_D nicht gesehen 10.1016/j.bbabio.2014.06.003
+    // Klassisch (Enzyme ohne H-Tunnelschritt)
+    Case{name:"AlkPhos",      pdb:"3TG0", kie:1.0,  label:Label::Classical}, // 10.1016/0022-2836(91)90724-k
+    Case{name:"PTP1B",        pdb:"1BZH", kie:1.0,  label:Label::Classical}, // 10.1021/bi9816958
+    Case{name:"AdK",          pdb:"1AKE", kie:1.0,  label:Label::Classical}, // 10.1016/0022-2836(92)90582-5
+    Case{name:"CDK2",         pdb:"1HCK", kie:1.0,  label:Label::Classical}, // 10.1021/jm960402a
+    Case{name:"Xylanase",     pdb:"1BCX", kie:1.0,  label:Label::Classical}, // 10.1021/bi982946f
+    Case{name:"Cel7A",        pdb:"1CEL", kie:1.0,  label:Label::Classical}, // 10.1126/science.8036495
+    Case{name:"ChiA",         pdb:"1CTN", kie:1.0,  label:Label::Classical}, // 10.1016/s0969-2126(94)00119-7
+    Case{name:"HIV-PR",       pdb:"1HSG", kie:1.0,  label:Label::Classical}, // 10.1039/c9sc01464k
+    Case{name:"ACE",          pdb:"1O86", kie:1.0,  label:Label::Classical}, // 10.1038/nature01370
+    Case{name:"ADA",          pdb:"2ADA", kie:1.0,  label:Label::Classical}, // 10.1126/science.1925539
+    Case{name:"CDA",          pdb:"1ALN", kie:1.0,  label:Label::Classical}, // 10.1021/bi9525583
+    Case{name:"Arginase",     pdb:"1RLA", kie:1.0,  label:Label::Classical}, // Mn2; 10.1038/383554a0
+    Case{name:"PTE",          pdb:"1HZY", kie:1.0,  label:Label::Classical}, // 10.1021/bi002661e
+    Case{name:"SNase",        pdb:"1SNC", kie:1.0,  label:Label::Classical}, // 10.1073/pnas.76.6.2551
+    Case{name:"PDF",          pdb:"1BSZ", kie:1.0,  label:Label::Classical}, // Fe; 10.1038/4162
+    Case{name:"NHase",        pdb:"1IRE", kie:1.0,  label:Label::Classical}, // Co; 10.1006/bbrc.2001.5897
+    Case{name:"FTase",        pdb:"1FT2", kie:1.0,  label:Label::Classical}, // 10.1021/ja065838m
+    Case{name:"MetAP",        pdb:"1MAT", kie:1.0,  label:Label::Classical}, // Co; WT statt 2MAT (R175Q); 10.1021/bi00066a009
+    Case{name:"HDAC8",        pdb:"1T69", kie:1.0,  label:Label::Classical}, // 10.1016/j.str.2004.04.012
+    Case{name:"PNP",          pdb:"3PNP", kie:1.0,  label:Label::Classical}, // 10.1021/bi7021365
+    Case{name:"PGM1",         pdb:"3PMG", kie:1.0,  label:Label::Classical}, // 10.1107/S0907444997000875
+    Case{name:"H-Ras",        pdb:"5P21", kie:1.0,  label:Label::Classical}, // 10.1016/j.jmb.2004.06.007
+    Case{name:"M.HhaI",       pdb:"2HMY", kie:1.0,  label:Label::Classical}, // SAM; unsicher (C5-H als Proton) 10.1006/jmbi.1999.2608
+    Case{name:"AsnaseII",     pdb:"3ECA", kie:1.0,  label:Label::Classical}, // 10.1021/acs.biochem.0c00116
+    Case{name:"DHOase",       pdb:"1XGE", kie:1.0,  label:Label::Classical}, // KCX natürlich, I119V Konflikt; 10.1016/j.jmb.2005.01.067
+    Case{name:"GCPII",        pdb:"2OOT", kie:1.0,  label:Label::Classical}, // 10.1107/S174430910700379X
+    Case{name:"PLC-Bc",       pdb:"1AH7", kie:1.0,  label:Label::Classical}, // 10.1038/338357a0
+    Case{name:"LAP",          pdb:"1LAM", kie:1.0,  label:Label::Classical}, // 10.1021/bi00045a021
+    Case{name:"Cutinase",     pdb:"1CUS", kie:1.0,  label:Label::Classical}, // 10.1038/356615a0
+    // Kontrollen (Kofaktor gebunden, keine Katalyse)
+    Case{name:"Amicyanin",    pdb:"1AAC", kie:1.0,  label:Label::Control}, // 10.1107/S0907444996001072
+    Case{name:"Pseudoazurin", pdb:"1PZB", kie:1.0,  label:Label::Control}, // 10.1016/0014-5793(94)00544-3
+    Case{name:"Rusticyanin",  pdb:"1RCY", kie:1.0,  label:Label::Control}, // 10.1006/jmbi.1996.0612
+    Case{name:"Stellacyanin", pdb:"1JER", kie:1.0,  label:Label::Control}, // 10.1002/pro.5560051104
+    Case{name:"Nitrosocyanin",pdb:"1IBY", kie:1.0,  label:Label::Control}, // unsicher (Funktion unklar) 10.1021/bi0102611
+    Case{name:"CopC",         pdb:"2C9Q", kie:1.0,  label:Label::Control}, // 10.1021/ja058528x
+    Case{name:"LOV2",         pdb:"2V0W", kie:1.0,  label:Label::Control}, // FMN; 10.1021/bi701543e
+    Case{name:"VVD",          pdb:"2PD7", kie:1.0,  label:Label::Control}, // FAD; 10.1126/science.1137128
+    Case{name:"BlrB",         pdb:"2BYC", kie:1.0,  label:Label::Control}, // FMN; 10.1073/pnas.0500722102
+    Case{name:"Dodecin",      pdb:"1MOG", kie:1.0,  label:Label::Control}, // 10.1016/s0969-2126(03)00048-0
+    Case{name:"Dps-like",     pdb:"2CLB", kie:1.0,  label:Label::Control}, // 10.1021/bi060782u
+    Case{name:"MitoNEET",     pdb:"2QH7", kie:1.0,  label:Label::Control}, // 10.1073/pnas.0707189104
+    Case{name:"FhuD",         pdb:"1K7S", kie:1.0,  label:Label::Control}, // 10.1074/jbc.M109385200
+    Case{name:"Hemopexin",    pdb:"1QHU", kie:1.0,  label:Label::Control}, // 10.1038/13294
+    Case{name:"IsdE",         pdb:"2Q8P", kie:1.0,  label:Label::Control}, // 10.1074/jbc.M704602200
+    Case{name:"CooA",         pdb:"1FT9", kie:1.0,  label:Label::Control}, // 10.1038/82820
+    Case{name:"BtuF",         pdb:"1N4A", kie:1.0,  label:Label::Control}, // B12; nur SeMet+His-Tag; 10.1074/jbc.M212239200
+    Case{name:"CeuE",         pdb:"5ADW", kie:1.0,  label:Label::Control}, // 10.1073/pnas.1520829113
+    Case{name:"HmuT",         pdb:"3NU1", kie:1.0,  label:Label::Control}, // Häm; WT Y. pestis statt 5B50 (Y240A); 10.1016/j.jmb.2010.09.005
 ]}
 
 // Triviale Baseline: "Bindet das Protein irgendeinen Redox-Kofaktor oder ein Redox-Metall?"
@@ -246,6 +315,10 @@ pub fn bench(which: &str) {
             eprintln!("\n  ⚠ TEST-SET v1.4: eingefroren 14.10.2026. Nur EINMAL auswerten.");
             let r = run(&test14_set()); split_report("TEST-SET v1.4 (neue Familien)", &r);
         }
-        _ => eprintln!("  meg-apsu bench dev|test|test14"),
+        "test15" => {
+            eprintln!("\n  ⚠ TEST-SET v1.5: eingefroren 19.10.2026. Nur EINMAL auswerten.");
+            let r = run(&test15_set()); split_report("TEST-SET v1.5 (neue Strukturen)", &r);
+        }
+        _ => eprintln!("  meg-apsu bench dev|test|test14|test15"),
     }
 }
