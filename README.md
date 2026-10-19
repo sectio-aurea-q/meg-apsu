@@ -112,4 +112,5 @@ researcher. Built on a self-repaired MacBook.
 
 ## License
 
-MIT
+AGPL-3.0-or-later (from v1.6). Versions up to v1.5 were released under MIT.
+If you use MEG-APSU in research, please cite it (see CITATION.cff).

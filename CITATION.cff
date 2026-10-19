@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use MEG-APSU, please cite it as below."
+title: "MEG-APSU: structure-based triage of hydrogen-tunnelling enzymes"
+authors:
+  - family-names: Hackfort
+    given-names: Sabrina
+    orcid: "https://orcid.org/0009-0007-7458-2487"
+repository-code: "https://github.com/sectio-aurea-q/meg-apsu"
+license: AGPL-3.0-or-later

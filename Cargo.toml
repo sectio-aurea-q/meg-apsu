@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["sectio-aurea-q <meg.depth@proton.me>"]
 description = "Structure-based triage of hydrogen-tunnelling enzymes from PDB files"
 repository = "https://github.com/sectio-aurea-q/meg-apsu"
-license = "MIT"
+license = "AGPL-3.0-or-later"
 keywords = ["quantum", "biology", "drug-discovery", "enzyme", "tunneling"]
 [[bin]]
 name = "meg-apsu"
