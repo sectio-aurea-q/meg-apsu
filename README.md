@@ -1,5 +1,7 @@
 # MEG-APSU
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23482316.svg)](https://doi.org/10.5281/zenodo.23482316)
+
 **Structure-based triage of hydrogen-tunnelling enzymes.**
 
 Given a PDB structure, MEG-APSU decides in milliseconds whether the active site contains
@@ -103,6 +105,12 @@ structures and all three benchmarks).
   `drugbank`, together with `how-it-works.html`. They made claims about classical
   mechanics, docking errors and drug withdrawals that the method does not support.
   Their literature data are kept in `data/`. Everything remains in the git history.
+
+## Earlier preprint
+
+The March 2026 preprint on MEG-APSU (doi:10.5281/zenodo.19208904) reported results that do not
+hold on a frozen test set; it has been corrected (doi:10.5281/zenodo.23480414). The benchmarks
+above supersede it.
 
 ## About
 
