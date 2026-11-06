@@ -424,14 +424,24 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
 
     // 5b. v1.2: SAM (S-adenosylmethionine) → Hydride/Methyl Transfer
     // COMT and other methyltransferases use SAM for methyl group transfer with tunneling
-    if !sam_at.is_empty() {
+    // v1.6 (06.11.2026), korrigiert: Als Methylgruppen-Spender überträgt SAM eine Methylgruppe, keinen Wasserstoff.
+    // Ein H-Atom abstrahiert SAM nur als Radikal-SAM: Am [4Fe-4S]-Cluster (SF4) entsteht das
+    // 5'-Desoxyadenosyl-Radikal, wie beim Adenosylcobalamin. Ohne Cluster gibt es kein H-Transfer-Zentrum.
+    let radical_sam = sam_at.iter().any(|&si| atoms.iter().any(|a| a.res == "SF4" && adist(&atoms[si], a) < 6.0));
+    if !sam_at.is_empty() && (!v16 || radical_sam) {
         let c = &atoms[sam_at[0]];
         let nr: Vec<String> = atoms.iter().filter(|a| !a.is_het && adist(c, a) < 5.0
             && matches!(a.name.as_str(),"NE2"|"ND1"|"SG"|"OD1"|"OD2"|"OE1"|"OE2"|"OG"|"OH"|"NZ"))
             .map(|a| format!("{}{}:{}", a.res, a.seq, a.name)).collect();
-        sites.push(ActiveSite { kind: format!("SAM methyltransfer ({})", atoms[sam_at[0]].res),
-            rxn: RxnType::HydrideTransfer.label().into(), barrier: RxnType::HydrideTransfer.barrier_ev() * 0.9,
-            residues: nr, has_substrate: true, substrate_name: atoms[sam_at[0]].res.clone() });
+        if v16 {
+            sites.push(ActiveSite { kind: format!("Radical SAM ({})", atoms[sam_at[0]].res),
+                rxn: RxnType::RadicalCH.label().into(), barrier: RxnType::RadicalCH.barrier_ev(),
+                residues: nr, has_substrate: true, substrate_name: atoms[sam_at[0]].res.clone() });
+        } else {
+            sites.push(ActiveSite { kind: format!("SAM methyltransfer ({})", atoms[sam_at[0]].res),
+                rxn: RxnType::HydrideTransfer.label().into(), barrier: RxnType::HydrideTransfer.barrier_ev() * 0.9,
+                residues: nr, has_substrate: true, substrate_name: atoms[sam_at[0]].res.clone() });
+        }
     }
 
     // 6. Ser-His-Asp / Cys-His-Asp → ProtonRelay
