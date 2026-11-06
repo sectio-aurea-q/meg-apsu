@@ -5,7 +5,8 @@
 //     Er wird erst nach Abschluss der Entwicklung EINMAL ausgewertet.
 //  3. Feste Schwelle QVS >= 10. Keine Optimierung auf den Bewertungsdaten.
 //  4. Jede Modellversion wird gegen eine triviale Kofaktor-Baseline gemessen.
-use crate::{download, full_scan, parse_pdb, is_heme, is_nad_fad, is_folate, is_pterin, is_sam, is_quinone, Target, V13};
+use crate::{download, full_scan, parse_pdb, is_heme, is_nad_fad, is_folate, is_pterin, is_sam, is_quinone,
+    is_cobalamin, is_f430, is_pqq, Target, V13, V16};
 use std::sync::atomic::Ordering;
 use std::{env, fs};
 
@@ -19,7 +20,10 @@ struct Case { name: &'static str, pdb: &'static str, kie: f64, label: Label }
 // v1.4: Wie gut ist das Label belegt? (vorab festgelegte Regel, nicht nach Ergebnissen)
 //  Stark: KIE >= 10 (über semiklassischem Maximum) ODER Tunneling-Nachweis per
 //         Temperaturabhängigkeit / Swain-Schaad in der Literatur (Quellen vor Veröffentlichung mit DOI belegen)
-//  Ausgeschlossen: RNR (1MXR = R2, H-Abstraktion liegt in R1), COMT (Methyltransfer, kein H-Transfer)
+//  Ausgeschlossen: RNR (1MXR = R2, H-Abstraktion liegt in R1)
+//  v1.6 (06.11.2026): COMT ist jetzt „klassisch“ (Methyltransfer, kein H-Transfer), IDO „klassisch, unsicher“
+//  (O2-Addition an C2=C3, keine C-H-Spaltung). RNR bleibt ausgeschlossen: 1MXR ist die R2-Untereinheit,
+//  das H abstrahiert das Cys439-Thiylradikal in R1, und dort liegt kein Kofaktor, den APSU sehen könnte.
 //  Unsicher: KIE < 10 ohne weiteren Nachweis; TIM/CA-II (echte Protonentransfers, "klassisch" unbelegt)
 #[derive(Clone, Copy, PartialEq)]
 enum Evidence { Stark, Unsicher, Ausgeschlossen }
@@ -27,9 +31,9 @@ enum Evidence { Stark, Unsicher, Ausgeschlossen }
 fn evidence(c: &Case) -> Evidence {
     match c.label {
         Label::Control => match c.name { "Nitrosocyanin" => Evidence::Unsicher, _ => Evidence::Stark },
-        Label::Classical => match c.name { "TIM" | "CA-II" | "M.HhaI" => Evidence::Unsicher, _ => Evidence::Stark },
+        Label::Classical => match c.name { "TIM" | "CA-II" | "M.HhaI" | "IDO" => Evidence::Unsicher, _ => Evidence::Stark },
         Label::Tunneling => match c.name {
-            "RNR" | "COMT" => Evidence::Ausgeschlossen,
+            "RNR" => Evidence::Ausgeschlossen,
             "GluMut" => Evidence::Stark,
             "DiolDH" => Evidence::Unsicher,
             "DHFR" | "TS" | "LADH" | "TMADH" | "PETNR" | "MR" => Evidence::Stark,
@@ -183,11 +187,48 @@ fn test15_set() -> Vec<Case> { vec![
 
 // Triviale Baseline: "Bindet das Protein irgendeinen Redox-Kofaktor oder ein Redox-Metall?"
 // Wenn ein Modell diese Baseline nicht schlägt, misst es nichts darüber hinaus.
+// v1.6: dieselbe erweiterte Kofaktorliste wie das Modell (Cobalamin, F430, PQQ), sonst wäre der Vergleich unfair.
 fn baseline(pdb: &str) -> bool {
     let (_, atoms) = parse_pdb(pdb);
     atoms.iter().any(|a| matches!(a.elem.as_str(), "FE"|"CU"|"MN"|"CO"|"MO")
         || is_heme(&a.res) || is_nad_fad(&a.res) || is_folate(&a.res)
-        || is_pterin(&a.res) || is_sam(&a.res) || is_quinone(&a.res))
+        || is_pterin(&a.res) || is_sam(&a.res) || is_quinone(&a.res)
+        || is_cobalamin(&a.res) || is_f430(&a.res) || is_pqq(&a.res))
+}
+
+// v1.6: Zweite Vergleichsregel, nur aus der Annotation: die EC-Nummer im PDB-Kopf (COMPND … EC:).
+// Festgelegt am 06.11.2026 vor dem Lauf auf test15. „Tunneling“, wenn eine EC-Nummer zu einer Klasse gehört,
+// deren Reaktion eine C-H-Bindung als Hydrid, H-Atom oder Proton im Redoxschritt spaltet:
+//   1.1 CH-OH · 1.2 Aldehyd/Oxo (C-H) · 1.3 CH-CH · 1.4 CH-NH2 · 1.5 CH-NH · 1.6 NAD(P)H (C4-H)
+//   1.13.11 Dioxygenasen (z. B. Lipoxygenasen) · 1.14 Monooxygenasen (C-H-Hydroxylierung) · 1.17 CH/CH2
+//   5.4.99 Adenosylcobalamin-Mutasen
+// Kein EC (Nicht-Enzym) oder jede andere Klasse → nicht Tunneling.
+const EC_CH: [&str; 10] = ["1.1.", "1.2.", "1.3.", "1.4.", "1.5.", "1.6.", "1.13.11.", "1.14.", "1.17.", "5.4.99."];
+fn ec_numbers(pdb: &str) -> Vec<String> {
+    let mut v = Vec::new();
+    for line in pdb.lines().filter(|l| l.starts_with("COMPND")) {
+        if let Some(i) = line.find("EC:") {
+            for e in line[i + 3..].split(|ch: char| ch == ',' || ch == ';' || ch.is_whitespace()) {
+                let e = e.trim();
+                if !e.is_empty() && e.chars().next().map_or(false, |ch| ch.is_ascii_digit()) { v.push(format!("{}.", e)); }
+            }
+        }
+    }
+    v
+}
+fn ec_rule(pdb: &str) -> bool { ec_numbers(pdb).iter().any(|e| EC_CH.iter().any(|p| e.starts_with(p))) }
+
+// Exakter McNemar-Test (zweiseitig) auf den diskordanten Paaren: b = nur A richtig, c = nur B richtig.
+fn mcnemar(b: usize, c: usize) -> f64 {
+    let n = b + c; if n == 0 { return 1.0; }
+    let k = b.min(c);
+    let mut lp = -(n as f64) * std::f64::consts::LN_2; // log P(X=0) bei p = 1/2
+    let mut cum = 0.0;
+    for i in 0..=k {
+        if i > 0 { lp += ((n - i + 1) as f64).ln() - (i as f64).ln(); }
+        cum += lp.exp();
+    }
+    (2.0 * cum).min(1.0)
 }
 
 // Wilson-Intervall (95 %) für einen Anteil k/n
@@ -218,7 +259,8 @@ fn spearman(x: &[f64], y: &[f64]) -> f64 {
 }
 
 #[derive(Clone)]
-struct Row { name: &'static str, pdb: &'static str, label: Label, kie: f64, v12: f64, v13: f64, kie13: f64, base: bool, ev: Evidence, cls: &'static str }
+struct Row { name: &'static str, pdb: &'static str, label: Label, kie: f64, v12: f64, v13: f64, kie13: f64,
+    v16: f64, kie16: f64, base: bool, ec: bool, ev: Evidence, cls: &'static str }
 
 fn run(set: &[Case]) -> Vec<Row> {
     let cache = format!("{}/.meg-apsu-pdb-cache", env::var("HOME").unwrap_or("/tmp".into()));
@@ -226,11 +268,14 @@ fn run(set: &[Case]) -> Vec<Row> {
     let mut rows = Vec::new();
     for c in set {
         let pdb = match download(c.pdb, &cache) { Ok(p) => p, Err(e) => { eprintln!("  FAIL {} {}", c.pdb, e); continue; } };
+        V16.store(false, Ordering::SeqCst);
         V13.store(false, Ordering::SeqCst); let (_,_,_,q12,_) = full_scan(&pdb);
         V13.store(true,  Ordering::SeqCst); let (_,_,_,q13,_) = full_scan(&pdb);
+        V16.store(true,  Ordering::SeqCst); let (_,_,_,q16,_) = full_scan(&pdb);
         rows.push(Row{ name:c.name, pdb:c.pdb, label:c.label, kie:c.kie, v12:q12.total, v13:q13.total,
-            kie13:q13.predicted_kie, base: baseline(&pdb), ev: evidence(c),
-            cls: if q13.n_radical > 0 { "radical" } else if q13.n_hydride > 0 { "hydride" } else { "other" } });
+            kie13:q13.predicted_kie, v16:q16.total, kie16:q16.predicted_kie, base: baseline(&pdb), ec: ec_rule(&pdb),
+            ev: evidence(c),
+            cls: if q16.n_radical > 0 { "radical" } else if q16.n_hydride > 0 { "hydride" } else { "other" } });
     }
     rows
 }
@@ -246,19 +291,21 @@ fn score(rows: &[Row], pred: &dyn Fn(&Row) -> bool) -> (usize, usize, usize, usi
 
 fn report(title: &str, rows: &[Row]) {
     eprintln!("\n  ═══ {} ({} Proteine) ═══", title, rows.len());
-    eprintln!("  {:16} {:5} {:10} {:>6} {:>6} {:>5}  {}", "Protein","PDB","Klasse","v1.2","v1.3","Base","");
+    eprintln!("  {:16} {:5} {:10} {:>6} {:>6} {:>6} {:>5} {:>5}  {}", "Protein","PDB","Klasse","v1.2","v1.3","v1.6","Base","EC","");
     for r in rows {
         let l = match r.label { Label::Tunneling=>"Tunneling", Label::Classical=>"Klassisch", Label::Control=>"Kontrolle" };
         let truth = r.label == Label::Tunneling;
         let ok = |p: bool| if p == truth { " " } else { "✗" };
-        eprintln!("  {:16} {:5} {:10} {:>5.1}{} {:>5.1}{} {:>4}{}", r.name, r.pdb, l,
-            r.v12, ok(r.v12>=THRESHOLD), r.v13, ok(r.v13>=THRESHOLD),
-            if r.base {"ja"} else {"nein"}, ok(r.base));
+        eprintln!("  {:16} {:5} {:10} {:>5.1}{} {:>5.1}{} {:>5.1}{} {:>4}{} {:>4}{}", r.name, r.pdb, l,
+            r.v12, ok(r.v12>=THRESHOLD), r.v13, ok(r.v13>=THRESHOLD), r.v16, ok(r.v16>=THRESHOLD),
+            if r.base {"ja"} else {"nein"}, ok(r.base), if r.ec {"ja"} else {"nein"}, ok(r.ec));
     }
-    let models: [(&str, Box<dyn Fn(&Row)->bool>); 3] = [
+    let models: [(&str, Box<dyn Fn(&Row)->bool>); 5] = [
         ("v1.2 (alt)",      Box::new(|r: &Row| r.v12 >= THRESHOLD)),
-        ("v1.3 (neu)",      Box::new(|r: &Row| r.v13 >= THRESHOLD)),
+        ("v1.3",            Box::new(|r: &Row| r.v13 >= THRESHOLD)),
+        ("v1.6 (neu)",      Box::new(|r: &Row| r.v16 >= THRESHOLD)),
         ("Kofaktor-Baseline",Box::new(|r: &Row| r.base)),
+        ("EC-Regel",        Box::new(|r: &Row| r.ec)),
     ];
     eprintln!("\n  {:18} {:>9} {:>9} {:>9} {:>17}  Konfusion", "Modell","Sens.","Spez.","Genauigk.","95%-KI Genauigk.");
     for (n, f) in models.iter() {
@@ -269,18 +316,29 @@ fn report(title: &str, rows: &[Row]) {
             tp as f64/(tp+fnn).max(1) as f64*100.0, tn as f64/(tn+fp).max(1) as f64*100.0,
             acc*100.0, lo*100.0, hi*100.0, tp, fnn, tn, fp);
     }
+    // v1.6: gepaarter Vergleich, exakter McNemar-Test (zweiseitig)
+    let right = |r: &Row, p: bool| p == (r.label == Label::Tunneling);
+    for (n, f) in [("Kofaktor-Baseline", Box::new(|r: &Row| r.base) as Box<dyn Fn(&Row)->bool>),
+                   ("EC-Regel", Box::new(|r: &Row| r.ec))].iter() {
+        let bb = rows.iter().filter(|r| right(r, r.v16 >= THRESHOLD) && !right(r, f(r))).count();
+        let cc = rows.iter().filter(|r| !right(r, r.v16 >= THRESHOLD) && right(r, f(r))).count();
+        eprintln!("  McNemar v1.6 gegen {}: nur v1.6 richtig {}, nur {} richtig {}, p = {:.4}", n, bb, n, cc, mcnemar(bb, cc));
+    }
     // Nur Kontrollen: Wie viele Nicht-Enzyme werden fälschlich als Tunneling markiert?
     let ctrl: Vec<&Row> = rows.iter().filter(|r| r.label==Label::Control).collect();
     if !ctrl.is_empty() {
         let f12 = ctrl.iter().filter(|r| r.v12>=THRESHOLD).count();
         let f13 = ctrl.iter().filter(|r| r.v13>=THRESHOLD).count();
-        eprintln!("\n  Kontrollen fälschlich positiv: v1.2 {}/{}  ·  v1.3 {}/{}", f12, ctrl.len(), f13, ctrl.len());
+        let f16 = ctrl.iter().filter(|r| r.v16>=THRESHOLD).count();
+        eprintln!("\n  Kontrollen fälschlich positiv: v1.2 {}/{}  ·  v1.3 {}/{}  ·  v1.6 {}/{}", f12, ctrl.len(), f13, ctrl.len(), f16, ctrl.len());
     }
     // KIE-Vorhersage nur auf Tunneling-Enzymen (Rangkorrelation)
     let pos: Vec<&Row> = rows.iter().filter(|r| r.label==Label::Tunneling && r.kie > 0.0).collect();
     let lit: Vec<f64> = pos.iter().map(|r| r.kie).collect();
     let pk: Vec<f64> = pos.iter().map(|r| r.kie13).collect();
     eprintln!("  KIE-Rangkorrelation v1.3 (Spearman ρ, n={}): {:.3}", pos.len(), spearman(&lit, &pk));
+    let pk16: Vec<f64> = pos.iter().map(|r| r.kie16).collect();
+    eprintln!("  KIE-Rangkorrelation v1.6 (Spearman ρ, n={}): {:.3}", pos.len(), spearman(&lit, &pk16));
 }
 
 fn split_report(title: &str, rows: &[Row]) {
@@ -299,11 +357,11 @@ pub fn bench(which: &str) {
         "dev" => { let r = run(&dev_set()); split_report("DEV-SET (Entwicklung)", &r); }
         "dev-csv" => {
             let r = run(&dev_set());
-            let mut out = String::from("name,pdb,label,evidence,cls,qvs13,kie_lit,kie_pred\n");
+            let mut out = String::from("name,pdb,label,evidence,cls,qvs13,qvs16,kie_lit,kie_pred\n");
             for x in &r {
                 let l = match x.label { Label::Tunneling=>"T", Label::Classical=>"K", Label::Control=>"C" };
                 let e = match x.ev { Evidence::Stark=>"stark", Evidence::Unsicher=>"unsicher", Evidence::Ausgeschlossen=>"aus" };
-                out += &format!("{},{},{},{},{},{:.2},{:.2},{:.2}\n", x.name, x.pdb, l, e, x.cls, x.v13, x.kie, x.kie13);
+                out += &format!("{},{},{},{},{},{:.2},{:.2},{:.2},{:.2}\n", x.name, x.pdb, l, e, x.cls, x.v13, x.v16, x.kie, x.kie16);
             }
             let _ = fs::write("apsu_dev.csv", out); eprintln!("  apsu_dev.csv geschrieben");
         }

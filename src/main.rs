@@ -21,6 +21,9 @@ mod bench;
 
 // v1.3: Katalyse-Filter für Metallzentren. false = altes v1.2-Verhalten (für Vergleiche).
 pub static V13: AtomicBool = AtomicBool::new(true);
+// v1.6 (06.11.2026): Kofaktoren B12, F430, PQQ (und SAM nur als Radikal-SAM, Schritt B).
+// Schaltbar, damit v1.2 und v1.3 im Benchmark bitgleich nachrechenbar bleiben.
+pub static V16: AtomicBool = AtomicBool::new(true);
 
 const HBAR: f64 = 1.054571817e-34;
 const KB: f64 = 1.380649e-23;
@@ -178,6 +181,14 @@ fn is_nucleotide_substrate(r: &str) -> bool {
     matches!(r, "ATP"|"ADP"|"AMP"|"GTP"|"GDP"|"ANP"|"ACP"|"AGS"|"ADN"|"APC"|"AP5"|"SEP"|"TPO"
         |"PYR"|"OAA"|"PEP"|"G6P"|"F6P"|"FBP"|"GAP"|"CTP"|"UTP"|"UDP"|"CDP")
 }
+// v1.6: Cobalamine, die ein H-Atom abstrahieren können. Methylcobalamin (COB) überträgt eine
+// Methylgruppe, keinen Wasserstoff, und gehört deshalb nicht dazu.
+fn is_cobalamin(r: &str) -> bool { matches!(r, "B12"|"CNC"|"B1Z") }
+// 5'-Desoxyadenosyl: Sein Radikal abstrahiert bei Adenosylcobalamin-Enzymen das H-Atom vom Substrat.
+fn is_adenosyl(r: &str) -> bool { matches!(r, "5AD"|"B1Z") }
+// v1.6: Faktor F430 (Ni) der Methyl-Coenzym-M-Reduktase, Pyrrolochinolinchinon (PQQ)
+fn is_f430(r: &str) -> bool { r == "F43" }
+fn is_pqq(r: &str) -> bool { r == "PQQ" }
 
 // ═══ v1.3: IST DIESES METALLZENTRUM KATALYTISCH? ═════════════════════════
 // Physikalische Regel, unabhängig von Enzymnamen: Eine C-H-Spaltung am Metall braucht
@@ -270,6 +281,7 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
     let pte_at: Vec<usize> = atoms.iter().enumerate().filter(|(_,a)| is_pterin(&a.res)).map(|(i,_)|i).collect();
     let sam_at: Vec<usize> = atoms.iter().enumerate().filter(|(_,a)| is_sam(&a.res)).map(|(i,_)|i).collect();
     let nuc_at: Vec<usize> = atoms.iter().enumerate().filter(|(_,a)| is_nucleotide_substrate(&a.res)).map(|(i,_)|i).collect();
+    let v16 = V16.load(AO::SeqCst);
 
     let v13 = V13.load(AO::SeqCst);
     let mut cat = vec![true; atoms.len()];
@@ -316,6 +328,52 @@ fn classify_sites(atoms: &[Atom]) -> Vec<ActiveSite> {
             rxn: RxnType::HydrideTransfer.label().into(), barrier: RxnType::HydrideTransfer.barrier_ev(),
             residues: nr, has_substrate: true,
             substrate_name: atoms[nad_at[0]].res.clone() });
+    }
+
+    // 2b. v1.6: Cobalamin → RadicalCH, aber nur, wenn es ein H-Atom abstrahieren kann.
+    // Physikalische Regel: Das H abstrahiert das 5'-Desoxyadenosyl-Radikal auf der oberen Seite des Corrins.
+    // Zählt deshalb nur mit 5'-Desoxyadenosyl am Cobalt ODER mit einem Substrat im Umkreis von 10 Å
+    // (Reichweite des 5'-Desoxyadenosyl-Radikals nach der Co-C-Spaltung: Co···C5' bis etwa 6 Å, H-Übertragung 3–4 Å).
+    // Cobalamin ohne beides ist Fracht (Transportprotein) und zählt nicht.
+    if v16 {
+        for (ci, c) in atoms.iter().enumerate() {
+            if !(c.elem == "CO" && is_cobalamin(&c.res)) { continue; }
+            let ado = atoms.iter().any(|a| is_adenosyl(&a.res) && adist(c, a) < 6.0);
+            let sub = het.iter().copied().find(|&hi| !is_cobalamin(&atoms[hi].res) && !is_adenosyl(&atoms[hi].res)
+                && adist(c, &atoms[hi]) < 10.0);
+            if ado || sub.is_some() {
+                sites.push(ActiveSite { kind: if ado { "Cobalamin (AdoCbl)".into() } else { format!("Cobalamin ({})", c.res) },
+                    rxn: RxnType::RadicalCH.label().into(), barrier: RxnType::RadicalCH.barrier_ev(),
+                    residues: coord_atoms(ci, 3.5), has_substrate: sub.is_some(),
+                    substrate_name: sub.map(|hi| atoms[hi].res.clone()).unwrap_or_default() });
+                break;
+            }
+        }
+    }
+
+    // 2c. v1.6: F430 (Ni) → RadicalCH. Methylradikal bzw. Ni-Methyl, H-Atom-Transfer vom Coenzym B.
+    if v16 {
+        if let Some(ni) = atoms.iter().position(|a| a.elem == "NI" && is_f430(&a.res)) {
+            let sub = het.iter().copied().find(|&hi| !is_f430(&atoms[hi].res) && adist(&atoms[ni], &atoms[hi]) < 8.0);
+            sites.push(ActiveSite { kind: "F430 (Ni)".into(), rxn: RxnType::RadicalCH.label().into(),
+                barrier: RxnType::RadicalCH.barrier_ev(), residues: coord_atoms(ni, 3.5),
+                has_substrate: sub.is_some(), substrate_name: sub.map(|hi| atoms[hi].res.clone()).unwrap_or_default() });
+        }
+    }
+
+    // 2d. v1.6: PQQ → Hydridtransfer (Chinoprotein-Dehydrogenasen: Hydrid vom Substrat-C-H auf PQQ-C5).
+    if v16 {
+        if let Some(pi) = atoms.iter().position(|a| is_pqq(&a.res)) {
+            let c = &atoms[pi];
+            let nr: Vec<String> = atoms.iter().filter(|a| !a.is_het && adist(c, a) < 5.0
+                && matches!(a.name.as_str(),"NE2"|"ND1"|"SG"|"OD1"|"OD2"|"OE1"|"OE2"|"OG"|"OH"|"NZ"))
+                .map(|a| format!("{}{}:{}", a.res, a.seq, a.name)).collect();
+            let sub = het.iter().copied().find(|&hi| !is_pqq(&atoms[hi].res)
+                && atoms.iter().any(|a| is_pqq(&a.res) && adist(a, &atoms[hi]) < 6.0));
+            sites.push(ActiveSite { kind: "PQQ".into(), rxn: RxnType::HydrideTransfer.label().into(),
+                barrier: RxnType::HydrideTransfer.barrier_ev(), residues: nr, has_substrate: sub.is_some(),
+                substrate_name: sub.map(|hi| atoms[hi].res.clone()).unwrap_or_default() });
+        }
     }
 
     // 3. Quinone (TPQ/TTQ/CTQ ONLY) → RadicalCH
@@ -592,12 +650,14 @@ fn pos() -> Vec<Target> { vec![
     Target{name:"TrxR",pdb:"1TDE",kie:3.0},           // Thioredoxin reductase
     Target{name:"GR",pdb:"3GRS",kie:3.0},             // Glutathione reductase
     Target{name:"RNR",pdb:"1MXR",kie:4.0},            // v1.2: 1MXR R2 subunit with di-iron
-    Target{name:"COMT",pdb:"3BWM",kie:4.5},           // Catechol O-methyltransferase
     Target{name:"GOx",pdb:"1CF3",kie:12.0},           // Glucose oxidase (Roth 2004)
     Target{name:"HRP",pdb:"1HCH",kie:3.0},            // Horseradish peroxidase
 ]}
 fn neg() -> Vec<Target> { vec![
     // ─── CLASSICAL (KIE ≈ 1.0) ─── No tunneling contribution
+    // v1.6 (06.11.2026): COMT von „Tunneling“ hierher. Methylgruppentransfer (SN2) vom SAM auf den
+    // Catechol-Sauerstoff, kein Wasserstofftransfer im chemischen Schritt. Der frühere KIE 4,5 war ohne Quelle.
+    Target{name:"COMT",pdb:"3BWM",kie:1.0},           // Catechol O-methyltransferase
     Target{name:"Lysozyme",pdb:"1LYZ",kie:1.0},
     Target{name:"Trypsin",pdb:"1TRN",kie:1.2},
     Target{name:"CA-II",pdb:"1CA2",kie:1.5},
@@ -703,7 +763,6 @@ fn held_pos() -> Vec<Target> { vec![
     Target{name:"TrpH",pdb:"1MLW",kie:4.0},           // Tryptophan hydroxylase (McKinney 2001)
     Target{name:"CYP2D6",pdb:"2F9Q",kie:9.0},         // Cytochrome P450 2D6
     Target{name:"CYP2C9",pdb:"1OG5",kie:8.0},         // Cytochrome P450 2C9
-    Target{name:"IDO",pdb:"2D0T",kie:6.0},            // Indoleamine 2,3-dioxygenase (heme)
     Target{name:"CPO",pdb:"1CPO",kie:5.0},            // Chloroperoxidase (heme-thiolate)
     // ─── HYDRIDE / MODERATE KIE ───
     Target{name:"NAO",pdb:"2C0U",kie:9.2},            // Nitroalkane oxidase (Gadda 2008, FAD)
@@ -717,6 +776,10 @@ fn held_pos() -> Vec<Target> { vec![
 ]}
 fn held_neg() -> Vec<Target> { vec![
     // ─── CLASSICAL ─── None of these were in training
+    // v1.6 (06.11.2026): IDO von „Tunneling“ hierher, Beleg „unsicher“. Dioxygenierung durch Addition von O2
+    // an C2=C3 des Indols über ein Häm-Eisen; im ratenbestimmenden Schritt wird keine C-H-Bindung gespalten.
+    // Der frühere KIE 6,0 war ohne Quelle. Zählt in „nur starke Labels“ weiterhin nicht.
+    Target{name:"IDO",pdb:"2D0T",kie:1.0},            // Indoleamine 2,3-dioxygenase (heme)
     Target{name:"PyrKin",pdb:"1PKN",kie:1.0},         // Pyruvate kinase
     Target{name:"PFK",pdb:"3PFK",kie:1.0},            // Phosphofructokinase
     Target{name:"GlyPhos",pdb:"1GPB",kie:1.0},        // Glycogen phosphorylase
