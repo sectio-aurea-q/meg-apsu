@@ -1,0 +1,213 @@
+[36m  MEG-APSU v1.6.0 — structure-based triage of hydrogen-tunnelling enzymes
+  sectio-aurea-q · MEGALODON Research[0m
+
+
+  ⚠ TEST-SET v1.5: eingefroren 19.10.2026. Nur EINMAL auswerten.
+
+  Label-Belege: stark 50 · unsicher 4 · ausgeschlossen 0
+
+  ═══ TEST-SET v1.5 (neue Strukturen) – wie bisher (54 Proteine) ═══
+  Protein          PDB   Klasse       v1.2   v1.3   v1.6  Base    EC  
+  DbM              4ZEL  Tunneling   74.0   58.0   58.0    ja    ja 
+  AAO              5OC1  Tunneling   47.0   47.0   47.0    ja    ja 
+  TSOX             1X31  Tunneling   47.0   47.0   47.0    ja    ja 
+  NAD-ME           1LLQ  Tunneling   47.0   47.0   47.0    ja    ja 
+  OleT             4L40  Tunneling   60.0   60.0   60.0    ja  nein✗
+  FNR              1QUE  Tunneling   47.0   47.0   47.0    ja  nein✗
+  AlkPhos          3TG0  Klassisch    0.0    0.0    0.0  nein  nein 
+  PTP1B            1BZH  Klassisch    0.0    0.0    0.0  nein  nein 
+  AdK              1AKE  Klassisch    0.0    0.0    0.0  nein  nein 
+  CDK2             1HCK  Klassisch    0.0    0.0    0.0  nein  nein 
+  Xylanase         1BCX  Klassisch    0.0    0.0    0.0  nein  nein 
+  Cel7A            1CEL  Klassisch    0.0    0.0    0.0  nein  nein 
+  ChiA             1CTN  Klassisch    0.0    0.0    0.0  nein  nein 
+  HIV-PR           1HSG  Klassisch    0.0    0.0    0.0  nein  nein 
+  ACE              1O86  Klassisch    0.0    0.0    0.0  nein  nein 
+  ADA              2ADA  Klassisch    0.0    0.0    0.0  nein  nein 
+  CDA              1ALN  Klassisch    0.0    0.0    0.0  nein  nein 
+  Arginase         1RLA  Klassisch   77.0✗  74.0✗  74.0✗   ja✗ nein 
+  PTE              1HZY  Klassisch    0.0    0.0    0.0  nein  nein 
+  SNase            1SNC  Klassisch   53.0✗  53.0✗  53.0✗   ja✗ nein 
+  PDF              1BSZ  Klassisch   75.0✗  74.0✗  74.0✗   ja✗ nein 
+  NHase            1IRE  Klassisch    0.0    0.0    0.0    ja✗ nein 
+  FTase            1FT2  Klassisch    0.0    0.0    0.0  nein  nein 
+  MetAP            1MAT  Klassisch   83.0✗  66.0✗  66.0✗   ja✗ nein 
+  HDAC8            1T69  Klassisch    0.0    0.0    0.0  nein  nein 
+  PNP              3PNP  Klassisch    0.0    0.0    0.0  nein  nein 
+  PGM1             3PMG  Klassisch    0.0    0.0    0.0  nein  nein 
+  H-Ras            5P21  Klassisch    6.4    6.4    6.4  nein  nein 
+  M.HhaI           2HMY  Klassisch   48.4✗  48.4✗   0.0    ja✗ nein 
+  AsnaseII         3ECA  Klassisch    0.0    0.0    0.0  nein  nein 
+  DHOase           1XGE  Klassisch    0.0    0.0    0.0  nein  nein 
+  GCPII            2OOT  Klassisch    0.0    0.0    0.0  nein  nein 
+  PLC-Bc           1AH7  Klassisch    0.0    0.0    0.0  nein  nein 
+  LAP              1LAM  Klassisch    0.0    0.0    0.0  nein  nein 
+  Cutinase         1CUS  Klassisch    6.4    6.4    6.4  nein  nein 
+  Amicyanin        1AAC  Kontrolle   72.0✗  62.0✗  62.0✗   ja✗ nein 
+  Pseudoazurin     1PZB  Kontrolle   66.0✗   6.4    6.4    ja✗ nein 
+  Rusticyanin      1RCY  Kontrolle   62.0✗   0.0    0.0    ja✗ nein 
+  Stellacyanin     1JER  Kontrolle   64.0✗  64.0✗  64.0✗   ja✗ nein 
+  Nitrosocyanin    1IBY  Kontrolle   85.0✗   0.0    0.0    ja✗ nein 
+  CopC             2C9Q  Kontrolle   82.0✗  62.0✗  62.0✗   ja✗ nein 
+  LOV2             2V0W  Kontrolle   55.0✗  55.0✗  55.0✗   ja✗ nein 
+  VVD              2PD7  Kontrolle   57.0✗  57.0✗  57.0✗   ja✗ nein 
+  BlrB             2BYC  Kontrolle   57.0✗  57.0✗  57.0✗   ja✗ nein 
+  Dodecin          1MOG  Kontrolle    0.0    0.0    0.0  nein  nein 
+  Dps-like         2CLB  Kontrolle   85.0✗  58.0✗  58.0✗   ja✗ nein 
+  MitoNEET         2QH7  Kontrolle   74.0✗  66.0✗  66.0✗   ja✗ nein 
+  FhuD             1K7S  Kontrolle    0.0    0.0    0.0    ja✗ nein 
+  Hemopexin        1QHU  Kontrolle   74.0✗   0.0    0.0    ja✗ nein 
+  IsdE             2Q8P  Kontrolle   74.0✗  64.0✗  64.0✗   ja✗ nein 
+  CooA             1FT9  Kontrolle   62.0✗   0.0    0.0    ja✗ nein 
+  BtuF             1N4A  Kontrolle    0.0    0.0    0.0    ja✗ nein 
+  CeuE             5ADW  Kontrolle   76.0✗  66.0✗  66.0✗   ja✗ nein 
+  HmuT             3NU1  Kontrolle   84.0✗  76.0✗  76.0✗   ja✗ nein 
+
+  Modell                 Sens.     Spez. Genauigk.  95%-KI Genauigk.  Konfusion
+  v1.2 (alt)            100.0%     56.2%     61.1%     47.8– 73.0%  TP=6 FN=0 TN=27 FP=21
+  v1.3                  100.0%     66.7%     70.4%     57.2– 80.9%  TP=6 FN=0 TN=32 FP=16
+  v1.6 (neu)            100.0%     68.8%     72.2%     59.1– 82.4%  TP=6 FN=0 TN=33 FP=15
+  Kofaktor-Baseline     100.0%     50.0%     55.6%     42.4– 68.0%  TP=6 FN=0 TN=24 FP=24
+  EC-Regel               66.7%    100.0%     96.3%     87.5– 99.0%  TP=4 FN=2 TN=48 FP=0
+  McNemar v1.6 gegen Kofaktor-Baseline: nur v1.6 richtig 9, nur Kofaktor-Baseline richtig 0, p = 0.0039
+  McNemar v1.6 gegen EC-Regel: nur v1.6 richtig 2, nur EC-Regel richtig 15, p = 0.0023
+
+  Kontrollen fälschlich positiv: v1.2 16/19  ·  v1.3 11/19  ·  v1.6 11/19
+  KIE-Rangkorrelation v1.3 (Spearman ρ, n=3): 0.000
+  KIE-Rangkorrelation v1.6 (Spearman ρ, n=3): 0.000
+
+  ═══ TEST-SET v1.5 (neue Strukturen) – ohne Ausschlüsse (54 Proteine) ═══
+  Protein          PDB   Klasse       v1.2   v1.3   v1.6  Base    EC  
+  DbM              4ZEL  Tunneling   74.0   58.0   58.0    ja    ja 
+  AAO              5OC1  Tunneling   47.0   47.0   47.0    ja    ja 
+  TSOX             1X31  Tunneling   47.0   47.0   47.0    ja    ja 
+  NAD-ME           1LLQ  Tunneling   47.0   47.0   47.0    ja    ja 
+  OleT             4L40  Tunneling   60.0   60.0   60.0    ja  nein✗
+  FNR              1QUE  Tunneling   47.0   47.0   47.0    ja  nein✗
+  AlkPhos          3TG0  Klassisch    0.0    0.0    0.0  nein  nein 
+  PTP1B            1BZH  Klassisch    0.0    0.0    0.0  nein  nein 
+  AdK              1AKE  Klassisch    0.0    0.0    0.0  nein  nein 
+  CDK2             1HCK  Klassisch    0.0    0.0    0.0  nein  nein 
+  Xylanase         1BCX  Klassisch    0.0    0.0    0.0  nein  nein 
+  Cel7A            1CEL  Klassisch    0.0    0.0    0.0  nein  nein 
+  ChiA             1CTN  Klassisch    0.0    0.0    0.0  nein  nein 
+  HIV-PR           1HSG  Klassisch    0.0    0.0    0.0  nein  nein 
+  ACE              1O86  Klassisch    0.0    0.0    0.0  nein  nein 
+  ADA              2ADA  Klassisch    0.0    0.0    0.0  nein  nein 
+  CDA              1ALN  Klassisch    0.0    0.0    0.0  nein  nein 
+  Arginase         1RLA  Klassisch   77.0✗  74.0✗  74.0✗   ja✗ nein 
+  PTE              1HZY  Klassisch    0.0    0.0    0.0  nein  nein 
+  SNase            1SNC  Klassisch   53.0✗  53.0✗  53.0✗   ja✗ nein 
+  PDF              1BSZ  Klassisch   75.0✗  74.0✗  74.0✗   ja✗ nein 
+  NHase            1IRE  Klassisch    0.0    0.0    0.0    ja✗ nein 
+  FTase            1FT2  Klassisch    0.0    0.0    0.0  nein  nein 
+  MetAP            1MAT  Klassisch   83.0✗  66.0✗  66.0✗   ja✗ nein 
+  HDAC8            1T69  Klassisch    0.0    0.0    0.0  nein  nein 
+  PNP              3PNP  Klassisch    0.0    0.0    0.0  nein  nein 
+  PGM1             3PMG  Klassisch    0.0    0.0    0.0  nein  nein 
+  H-Ras            5P21  Klassisch    6.4    6.4    6.4  nein  nein 
+  M.HhaI           2HMY  Klassisch   48.4✗  48.4✗   0.0    ja✗ nein 
+  AsnaseII         3ECA  Klassisch    0.0    0.0    0.0  nein  nein 
+  DHOase           1XGE  Klassisch    0.0    0.0    0.0  nein  nein 
+  GCPII            2OOT  Klassisch    0.0    0.0    0.0  nein  nein 
+  PLC-Bc           1AH7  Klassisch    0.0    0.0    0.0  nein  nein 
+  LAP              1LAM  Klassisch    0.0    0.0    0.0  nein  nein 
+  Cutinase         1CUS  Klassisch    6.4    6.4    6.4  nein  nein 
+  Amicyanin        1AAC  Kontrolle   72.0✗  62.0✗  62.0✗   ja✗ nein 
+  Pseudoazurin     1PZB  Kontrolle   66.0✗   6.4    6.4    ja✗ nein 
+  Rusticyanin      1RCY  Kontrolle   62.0✗   0.0    0.0    ja✗ nein 
+  Stellacyanin     1JER  Kontrolle   64.0✗  64.0✗  64.0✗   ja✗ nein 
+  Nitrosocyanin    1IBY  Kontrolle   85.0✗   0.0    0.0    ja✗ nein 
+  CopC             2C9Q  Kontrolle   82.0✗  62.0✗  62.0✗   ja✗ nein 
+  LOV2             2V0W  Kontrolle   55.0✗  55.0✗  55.0✗   ja✗ nein 
+  VVD              2PD7  Kontrolle   57.0✗  57.0✗  57.0✗   ja✗ nein 
+  BlrB             2BYC  Kontrolle   57.0✗  57.0✗  57.0✗   ja✗ nein 
+  Dodecin          1MOG  Kontrolle    0.0    0.0    0.0  nein  nein 
+  Dps-like         2CLB  Kontrolle   85.0✗  58.0✗  58.0✗   ja✗ nein 
+  MitoNEET         2QH7  Kontrolle   74.0✗  66.0✗  66.0✗   ja✗ nein 
+  FhuD             1K7S  Kontrolle    0.0    0.0    0.0    ja✗ nein 
+  Hemopexin        1QHU  Kontrolle   74.0✗   0.0    0.0    ja✗ nein 
+  IsdE             2Q8P  Kontrolle   74.0✗  64.0✗  64.0✗   ja✗ nein 
+  CooA             1FT9  Kontrolle   62.0✗   0.0    0.0    ja✗ nein 
+  BtuF             1N4A  Kontrolle    0.0    0.0    0.0    ja✗ nein 
+  CeuE             5ADW  Kontrolle   76.0✗  66.0✗  66.0✗   ja✗ nein 
+  HmuT             3NU1  Kontrolle   84.0✗  76.0✗  76.0✗   ja✗ nein 
+
+  Modell                 Sens.     Spez. Genauigk.  95%-KI Genauigk.  Konfusion
+  v1.2 (alt)            100.0%     56.2%     61.1%     47.8– 73.0%  TP=6 FN=0 TN=27 FP=21
+  v1.3                  100.0%     66.7%     70.4%     57.2– 80.9%  TP=6 FN=0 TN=32 FP=16
+  v1.6 (neu)            100.0%     68.8%     72.2%     59.1– 82.4%  TP=6 FN=0 TN=33 FP=15
+  Kofaktor-Baseline     100.0%     50.0%     55.6%     42.4– 68.0%  TP=6 FN=0 TN=24 FP=24
+  EC-Regel               66.7%    100.0%     96.3%     87.5– 99.0%  TP=4 FN=2 TN=48 FP=0
+  McNemar v1.6 gegen Kofaktor-Baseline: nur v1.6 richtig 9, nur Kofaktor-Baseline richtig 0, p = 0.0039
+  McNemar v1.6 gegen EC-Regel: nur v1.6 richtig 2, nur EC-Regel richtig 15, p = 0.0023
+
+  Kontrollen fälschlich positiv: v1.2 16/19  ·  v1.3 11/19  ·  v1.6 11/19
+  KIE-Rangkorrelation v1.3 (Spearman ρ, n=3): 0.000
+  KIE-Rangkorrelation v1.6 (Spearman ρ, n=3): 0.000
+
+  ═══ TEST-SET v1.5 (neue Strukturen) – nur starke Labels (50 Proteine) ═══
+  Protein          PDB   Klasse       v1.2   v1.3   v1.6  Base    EC  
+  DbM              4ZEL  Tunneling   74.0   58.0   58.0    ja    ja 
+  AAO              5OC1  Tunneling   47.0   47.0   47.0    ja    ja 
+  TSOX             1X31  Tunneling   47.0   47.0   47.0    ja    ja 
+  NAD-ME           1LLQ  Tunneling   47.0   47.0   47.0    ja    ja 
+  AlkPhos          3TG0  Klassisch    0.0    0.0    0.0  nein  nein 
+  PTP1B            1BZH  Klassisch    0.0    0.0    0.0  nein  nein 
+  AdK              1AKE  Klassisch    0.0    0.0    0.0  nein  nein 
+  CDK2             1HCK  Klassisch    0.0    0.0    0.0  nein  nein 
+  Xylanase         1BCX  Klassisch    0.0    0.0    0.0  nein  nein 
+  Cel7A            1CEL  Klassisch    0.0    0.0    0.0  nein  nein 
+  ChiA             1CTN  Klassisch    0.0    0.0    0.0  nein  nein 
+  HIV-PR           1HSG  Klassisch    0.0    0.0    0.0  nein  nein 
+  ACE              1O86  Klassisch    0.0    0.0    0.0  nein  nein 
+  ADA              2ADA  Klassisch    0.0    0.0    0.0  nein  nein 
+  CDA              1ALN  Klassisch    0.0    0.0    0.0  nein  nein 
+  Arginase         1RLA  Klassisch   77.0✗  74.0✗  74.0✗   ja✗ nein 
+  PTE              1HZY  Klassisch    0.0    0.0    0.0  nein  nein 
+  SNase            1SNC  Klassisch   53.0✗  53.0✗  53.0✗   ja✗ nein 
+  PDF              1BSZ  Klassisch   75.0✗  74.0✗  74.0✗   ja✗ nein 
+  NHase            1IRE  Klassisch    0.0    0.0    0.0    ja✗ nein 
+  FTase            1FT2  Klassisch    0.0    0.0    0.0  nein  nein 
+  MetAP            1MAT  Klassisch   83.0✗  66.0✗  66.0✗   ja✗ nein 
+  HDAC8            1T69  Klassisch    0.0    0.0    0.0  nein  nein 
+  PNP              3PNP  Klassisch    0.0    0.0    0.0  nein  nein 
+  PGM1             3PMG  Klassisch    0.0    0.0    0.0  nein  nein 
+  H-Ras            5P21  Klassisch    6.4    6.4    6.4  nein  nein 
+  AsnaseII         3ECA  Klassisch    0.0    0.0    0.0  nein  nein 
+  DHOase           1XGE  Klassisch    0.0    0.0    0.0  nein  nein 
+  GCPII            2OOT  Klassisch    0.0    0.0    0.0  nein  nein 
+  PLC-Bc           1AH7  Klassisch    0.0    0.0    0.0  nein  nein 
+  LAP              1LAM  Klassisch    0.0    0.0    0.0  nein  nein 
+  Cutinase         1CUS  Klassisch    6.4    6.4    6.4  nein  nein 
+  Amicyanin        1AAC  Kontrolle   72.0✗  62.0✗  62.0✗   ja✗ nein 
+  Pseudoazurin     1PZB  Kontrolle   66.0✗   6.4    6.4    ja✗ nein 
+  Rusticyanin      1RCY  Kontrolle   62.0✗   0.0    0.0    ja✗ nein 
+  Stellacyanin     1JER  Kontrolle   64.0✗  64.0✗  64.0✗   ja✗ nein 
+  CopC             2C9Q  Kontrolle   82.0✗  62.0✗  62.0✗   ja✗ nein 
+  LOV2             2V0W  Kontrolle   55.0✗  55.0✗  55.0✗   ja✗ nein 
+  VVD              2PD7  Kontrolle   57.0✗  57.0✗  57.0✗   ja✗ nein 
+  BlrB             2BYC  Kontrolle   57.0✗  57.0✗  57.0✗   ja✗ nein 
+  Dodecin          1MOG  Kontrolle    0.0    0.0    0.0  nein  nein 
+  Dps-like         2CLB  Kontrolle   85.0✗  58.0✗  58.0✗   ja✗ nein 
+  MitoNEET         2QH7  Kontrolle   74.0✗  66.0✗  66.0✗   ja✗ nein 
+  FhuD             1K7S  Kontrolle    0.0    0.0    0.0    ja✗ nein 
+  Hemopexin        1QHU  Kontrolle   74.0✗   0.0    0.0    ja✗ nein 
+  IsdE             2Q8P  Kontrolle   74.0✗  64.0✗  64.0✗   ja✗ nein 
+  CooA             1FT9  Kontrolle   62.0✗   0.0    0.0    ja✗ nein 
+  BtuF             1N4A  Kontrolle    0.0    0.0    0.0    ja✗ nein 
+  CeuE             5ADW  Kontrolle   76.0✗  66.0✗  66.0✗   ja✗ nein 
+  HmuT             3NU1  Kontrolle   84.0✗  76.0✗  76.0✗   ja✗ nein 
+
+  Modell                 Sens.     Spez. Genauigk.  95%-KI Genauigk.  Konfusion
+  v1.2 (alt)            100.0%     58.7%     62.0%     48.2– 74.1%  TP=4 FN=0 TN=27 FP=19
+  v1.3                  100.0%     67.4%     70.0%     56.2– 80.9%  TP=4 FN=0 TN=31 FP=15
+  v1.6 (neu)            100.0%     67.4%     70.0%     56.2– 80.9%  TP=4 FN=0 TN=31 FP=15
+  Kofaktor-Baseline     100.0%     52.2%     56.0%     42.3– 68.8%  TP=4 FN=0 TN=24 FP=22
+  EC-Regel              100.0%    100.0%    100.0%     92.9–100.0%  TP=4 FN=0 TN=46 FP=0
+  McNemar v1.6 gegen Kofaktor-Baseline: nur v1.6 richtig 7, nur Kofaktor-Baseline richtig 0, p = 0.0156
+  McNemar v1.6 gegen EC-Regel: nur v1.6 richtig 0, nur EC-Regel richtig 15, p = 0.0001
+
+  Kontrollen fälschlich positiv: v1.2 15/18  ·  v1.3 11/18  ·  v1.6 11/18
+  KIE-Rangkorrelation v1.3 (Spearman ρ, n=3): 0.000
+  KIE-Rangkorrelation v1.6 (Spearman ρ, n=3): 0.000

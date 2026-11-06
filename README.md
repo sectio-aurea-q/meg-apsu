@@ -87,8 +87,11 @@ Structures are downloaded from RCSB on first use and cached in `~/.meg-apsu-pdb-
 
 ## Limitations
 
-- Cofactor coverage: B12, F430, PQQ and other cofactors outside the motif list are not
-  recognised.
+- Cofactor coverage: v1.6 adds cobalamin, F430 and PQQ; other cofactors outside the motif
+  list are not recognised.
+- False alarms on redox proteins without C–H chemistry (cupredoxins, flavin photoreceptors,
+  haem and siderophore binding proteins) and on metal hydrolases: 15 of 46 on test15.
+- On annotated enzymes the yes/no score is worse than reading the EC number (test15).
 - Apo structures, or structures without a bound substrate or cofactor, can be missed.
 - The score does not rank enzymes by KIE size (TEST v1.4: Spearman ρ = −0.35, n = 5).
 - Small test sets: confidence intervals are wide.
@@ -106,13 +109,26 @@ structures and all three benchmarks).
   mechanics, docking errors and drug withdrawals that the method does not support.
   Their literature data are kept in `data/`. Everything remains in the git history.
 
-## v1.6 (in preparation, not yet tested)
+## v1.6, tested once on test15
 
 The table above is v1.5.1. v1.6 recognises cobalamin (only with a 5'-deoxyadenosyl group or a
 substrate at the cobalt), F430 and PQQ, counts SAM as H transfer only as radical SAM, and
-corrects three labels (COMT, IDO, RNR). It is compared with the cofactor rule and with an
-EC-number rule. It will be evaluated once on test15, as fixed in
-[`docs/test15_protocol.md`](docs/test15_protocol.md) before the run.
+corrects three labels (COMT, IDO, RNR). The rules and both comparators were fixed in
+[`docs/test15_protocol.md`](docs/test15_protocol.md) and pushed as tag `test15-vorab` before
+the single run.
+
+| test15, strong labels (50) | accuracy (95 % CI) | tunnelling found | false alarms |
+|---|---|---|---|
+| MEG-APSU v1.6 | **70.0 % (56.2–80.9)** | 4 of 4 | 15 of 46 |
+| cofactor rule | 56.0 % (42.3–68.8) | 4 of 4 | 22 of 46 |
+| EC-number rule | 100.0 % (92.9–100.0) | 4 of 4 | 0 of 46 |
+
+v1.6 finds every tunnelling enzyme and is significantly better than the cofactor rule (exact
+McNemar test, p = 0.016), but significantly worse than a rule that only reads the EC number
+(p = 0.0001). For annotated enzymes the EC number gives the better yes/no answer; MEG-APSU has
+to earn its place on structures without annotation and by predicting the size of the isotope
+effect. Details: [`docs/test15_result.md`](docs/test15_result.md); raw output:
+[`test15_ergebnis.txt`](test15_ergebnis.txt).
 
 ## Earlier preprint
 
