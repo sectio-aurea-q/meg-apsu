@@ -106,6 +106,14 @@ structures and all three benchmarks).
   mechanics, docking errors and drug withdrawals that the method does not support.
   Their literature data are kept in `data/`. Everything remains in the git history.
 
+## v1.6 (in preparation, not yet tested)
+
+The table above is v1.5.1. v1.6 recognises cobalamin (only with a 5'-deoxyadenosyl group or a
+substrate at the cobalt), F430 and PQQ, counts SAM as H transfer only as radical SAM, and
+corrects three labels (COMT, IDO, RNR). It is compared with the cofactor rule and with an
+EC-number rule. It will be evaluated once on test15, as fixed in
+[`docs/test15_protocol.md`](docs/test15_protocol.md) before the run.
+
 ## Earlier preprint
 
 The March 2026 preprint on MEG-APSU (doi:10.5281/zenodo.19208904) reported results that do not

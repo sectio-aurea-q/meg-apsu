@@ -5,6 +5,8 @@
 //     Er wird erst nach Abschluss der Entwicklung EINMAL ausgewertet.
 //  3. Feste Schwelle QVS >= 10. Keine Optimierung auf den Bewertungsdaten.
 //  4. Jede Modellversion wird gegen eine triviale Kofaktor-Baseline gemessen.
+//  5. v1.6: zusätzlich gegen eine EC-Regel (nur Annotation), gepaart mit exaktem McNemar-Test.
+//     Protokoll für test15, vor dem Lauf festgelegt: docs/test15_protocol.md
 use crate::{download, full_scan, parse_pdb, is_heme, is_nad_fad, is_folate, is_pterin, is_sam, is_quinone,
     is_cobalamin, is_f430, is_pqq, Target, V13, V16};
 use std::sync::atomic::Ordering;
